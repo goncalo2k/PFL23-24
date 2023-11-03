@@ -47,7 +47,7 @@ state_win_checker :-
         asserta(current_game_state(FinalState)),
         asserta(winner(CurrentPlayer)).
 
-state_win_checker(_,_).
+state_win_checker.
 
 % Rule to switch the current game state.
 state_switch_forward :-
@@ -56,7 +56,7 @@ state_switch_forward :-
         retract(current_game_state(CurrentState)),
         asserta(current_game_state(New)).
 
-state_switcher(_).
+state_switch_forward.
 
 % Rule to switch between players.
 player_switcher :-
@@ -65,7 +65,7 @@ player_switcher :-
         retract(current_player(CurrentPlayer)),
         asserta(current_player(NewPlayer)).
 
-player_switcher(_).
+player_switcher.
 
 % Rule to force set the current player.
 player_setter(SelectedPlayer) :-        % Functional only once, at the beggin of game, to determine which player starts first.
