@@ -35,7 +35,8 @@ translate(g-5, X) :- char_code(X, 11039).
 disc(black).
 disc(white).
 
-board([ [0,0,0,0,0],
+initialize_board(Board, Size) :-
+    [   [0,0,0,0,0],
         [0,0,0,0,0,0],
         [0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0],
@@ -44,7 +45,7 @@ board([ [0,0,0,0,0],
         [0,0,0,0,0,0,0],
         [0,0,0,0,0,0],
         [0,0,0,0,0]
-    ]).
+    ].
 
 /* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- 
 
