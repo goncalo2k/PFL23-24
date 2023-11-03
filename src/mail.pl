@@ -1,3 +1,6 @@
+/* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
+
+
 % Define the menu options as facts.
 menu_option(1, "Start Game").
 menu_option(2, "Options").
