@@ -1,4 +1,52 @@
-/* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
+:-use_module(library(lists)).
+
+%%%%% Helper Characters %%%%%
+
+% vertical    (-VerticalSeparator  )
+% horizontal  (-HorizontalSeparator)
+% right_corner(-RightCorner)
+% left_corner (-LeftCorner )
+% down_corner (-DownCorner )
+% up_corner   (-UpCorner   )
+
+vertical(Symbol)     :- char_code(Symbol, 9474).
+horizontal(Symbol)   :- char_code(Symbol, 9472).
+top_right_corner(Symbol) :- char_code(Symbol, 9488).
+top_left_corner(Symbol)  :- char_code(Symbol, 9484).
+bot_right_corner(Symbol) :- char_code(Symbol, 9496).
+bot_left_corner(Symbol)  :- char_code(Symbol, 9492).
+down_corner(Symbol)  :- char_code(Symbol, 9516).
+up_corner(Symbol)    :- char_code(Symbol, 9524).
+white_disk(Symbol) :- char_code(Symbol, 9675).
+black_disk(Symbol) :- char_code(Symbol, 9679).
+
+% translate(+CellPiece, -WritableSymbol)
+translate(0, ' ').
+translate(r-1, X) :- char_code(X,  9675).
+translate(r-3, X) :- char_code(X,  9651).
+translate(r-4, X) :- char_code(X,  9633).
+translate(r-5, X) :- char_code(X, 11040).
+
+translate(g-1, X) :- char_code(X,  9679).
+translate(g-3, X) :- char_code(X,  9650).
+translate(g-4, X) :- char_code(X,  9632).
+translate(g-5, X) :- char_code(X, 11039).
+
+disc(black).
+disc(white).
+
+board([ [0,0,0,0,0],
+        [0,0,0,0,0,0],
+        [0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0]
+        [0,0,0,0,0,0,0,0]
+        [0,0,0,0,0,0,0],
+        [0,0,0,0,0,0],
+        [0,0,0,0,0],
+    ]).
+
+/* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- 
 
 
 
@@ -17,11 +65,10 @@ board([
     ['.','.','.','.','.','.'],
     ['.','.','.','.','.','.','.'],
     ['.','.','.','.','.','.','.','.'],
-    ['.','.','.','.','.','.','.','.'],
-    ['.','.','.','.','.','.','.','.'],
-    ['.','.','.','.','.','.','.','.'],
+    ['.','.','.','.','.','.','.','.','.'],
     ['.','.','.','.','.','.','.','.'],
     ['.','.','.','.','.','.','.'],
+    ['.','.','.','.','.','.'],
     ['.','.','.','.','.']
 ]).
 
@@ -266,3 +313,4 @@ between(Min, Max, Value) :-
 switch_player(black, white).
 switch_player(white, black).
 
+*/
