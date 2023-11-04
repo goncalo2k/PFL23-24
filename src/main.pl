@@ -1,6 +1,7 @@
 :-ensure_loaded('board.pl').
 :-ensure_loaded('game.pl').
 :-ensure_loaded('state.pl').
+:-ensure_loaded('helper_predicates.pl').
 
 main_menu_loop :-
     display_main_menu,

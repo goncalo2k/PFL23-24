@@ -3,5 +3,5 @@
 start_game(P1, P2) :-
     write('What is your desired board size? (default is 9)'), nl,
     read(Size),
-    initialize_board(Board,Size).
+    initialize_board(Size,Board).
     %display_game(Board,Size).

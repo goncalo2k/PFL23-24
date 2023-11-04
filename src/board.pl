@@ -22,30 +22,34 @@ black_disk(Symbol) :- char_code(Symbol, 9679).
 
 % translate(+CellPiece, -WritableSymbol)
 translate(0, ' ').
-translate(r-1, X) :- char_code(X,  9675).
-translate(r-3, X) :- char_code(X,  9651).
-translate(r-4, X) :- char_code(X,  9633).
-translate(r-5, X) :- char_code(X, 11040).
+translate(b, X) :- char_code(X,  9675).
+% translate(r-3, X) :- char_code(X,  9651).
+% translate(r-4, X) :- char_code(X,  9633).
+% translate(r-5, X) :- char_code(X, 11040).
 
-translate(g-1, X) :- char_code(X,  9679).
-translate(g-3, X) :- char_code(X,  9650).
-translate(g-4, X) :- char_code(X,  9632).
-translate(g-5, X) :- char_code(X, 11039).
+translate(w, X) :- char_code(X,  9679).
+% translate(g-3, X) :- char_code(X,  9650).
+% translate(g-4, X) :- char_code(X,  9632).
+% translate(g-5, X) :- char_code(X, 11039).
 
 disc(black).
 disc(white).
 
-initialize_board(Board, Size) :-
-    [   [0,0,0,0,0],
-        [0,0,0,0,0,0],
-        [0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0],
-        [0,0,0,0,0,0],
-        [0,0,0,0,0]
-    ].
+
+
+initialize_board(Size, Board) :-
+    S is (Size // 2),
+    L is Size - 1,
+    upper_lists(S, L, UpperLists),
+    lower_lists(S, L, LowerLists),
+    middle_list(Size, List),
+    append(UpperLists, [List], Temp),
+    append(Temp, LowerLists, Board).
+
+display_board(Board, Size) :-
+    true.
+
+
 
 /* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- 
 
