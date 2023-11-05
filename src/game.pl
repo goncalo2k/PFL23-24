@@ -1,5 +1,5 @@
 /* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
-piece_percentage(36).
+piece_percentage(37).
 
 display_game(GameState) :-
         length(GameState, Length),
@@ -22,7 +22,8 @@ start_game(P1, P2) :-
 %Placement Phase
 placement_phase_loop(_, _, 0).
 placement_phase_loop(Board,Size, N) :-
-    write('Missing '), write(N*2), write(' pieces on the board.'),
+    TempN is N*2,
+    write('Missing '), write(TempN), write(' pieces on the board.'),
     current_player(Player),
     (Player == black -> write('Black ') ; write('White ')),
     write('player, what is the color of the piece you want to place?'),

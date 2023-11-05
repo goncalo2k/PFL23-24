@@ -61,7 +61,6 @@ display_game(Board, Size) :-
     display_lower_most_row(Last, Size).
 
 place_piece(X,Y,Board,Size,Color,NewBoard) :-
-    write(Board),
     nl,
     is_not_middle(X,Y,Size, X1, Y1),
     nth0(X1, Board, Row),
@@ -75,8 +74,10 @@ place_piece(X,Y,Board,Size,Color,NewBoard) :-
             replace(Board,X1,NewRow,NewBoard)
         ) 
         ;
-        (write('Invalid move'), nl,
-         append([], Board, NewBoard))
+        (write('Invalid move, try again.'), nl,
+        write('Where would you like to place your piece?'), nl,
+        coordenates_input(NewX, NewY, Size),
+        place_piece(NewX, NewY, Board, Size, Color, NewBoard))
     ).
     
 display_upper_most_row(List, Size) :-
