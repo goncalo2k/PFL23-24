@@ -14,7 +14,7 @@ main_menu_loop :-
 display_main_menu :-
     nl,
     nl,
-    write('===================================='), nl,
+    write('===================================='), nl,  
     write('         Welcome to DuAlma!         '), nl,
     write('===================================='), nl,
     write('Please select an option:            '), nl,
@@ -29,15 +29,18 @@ display_main_menu :-
 
 manage_input(1) :-
     start_game('P','P'),
-    main_menu_loop.
+    main_menu_loop,
+    !.
 
 manage_input(2) :-
     %start_game('P','C'),
-    main_menu_loop.
+    main_menu_loop,
+    !.
 
 manage_input(3) :-
     %start_game('C','C'),
-    main_menu_loop.
+    main_menu_loop,
+    !.
 
 manage_input(4) :-
     write('Exiting...'), nl,
@@ -45,7 +48,8 @@ manage_input(4) :-
 
 manage_input(_) :-
     nl, write('Invalid option!'), nl,
-    main_menu_loop.
+    main_menu_loop,
+    !.
 
 
 % Rule to display the in-game menu.
