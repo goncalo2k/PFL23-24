@@ -45,35 +45,10 @@ placement_phase_loop(Board,Size, N) :-
     player_switcher,
     N1 is N - 1,
     placement_phase_loop(LastBoard,Size, N1).
-    
-manage_color_input(_, _, _,'b') :-
-    write('Black it is!'), nl.
 
-manage_color_input(_, _, _,'w') :-
-    write('White it is!'), nl.
-
-manage_color_input(Board,Size, N, _) :-
-    write('Invalid color!'), nl,
-    write('Please choose between "b" and "w".'), nl,
-    placement_phase_loop(Board,Size, N),
-    !.
-
-coordenates_input(X, Y, Size) :-
-        write('Row:'), read(Temp1), nl,
-        verify_input(Temp1, 0, Size, X),
-        write('Column:'), read(Temp2), nl,
-        verify_input(Temp2, 0, Size, Y).
-     
-verify_input(Value, LowerBound,UpperBound, Return) :-
-        number(Value),
-        Value >= LowerBound,
-        Value < UpperBound,
-        Return is Value.
-
-verify_input(_,LowerBound, UpperBound, Return) :-
-        write('Invalid input, try again: '),
-        read(Temp),
-        verify_input(Temp, LowerBound, UpperBound, Return).
+win_conditioning_check(Board) :-
+        !.
+   
         
 
 %Movement Phase

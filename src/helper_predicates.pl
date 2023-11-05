@@ -10,7 +10,7 @@ lower_lists(S, L, LowerLists) :-
 
 middle_list(Size, List) :-
     length(List, Size),
-    fill_list(Size, 0, List).
+    fill_list(Size, [0,0], List).
 
 generate_lists(Size, Length, Lists) :-
     generate_lists(Size, Length, [], Lists).
@@ -26,7 +26,7 @@ generate_lists(Size, Length, Acc, Lists) :-
 
 generate_list(Length, List) :-
     length(List, Length),
-    fill_list(Length, 0, List).
+    fill_list(Length, [0,0], List).
 
 fill_list(0, _, []).
 
@@ -133,13 +133,11 @@ write_line([First|Rest], N) :-
     write_line(Rest, N).
 
 write_piece_upper(Element) :-
-    position_state(Element, ReturnList),
-    last(ReturnList, Important),
+    last(Element, Important),
     write_piece(Important).
 
 write_piece_lower(Element) :-
-    position_state(Element, ReturnList),
-    nth0(0, ReturnList, Important),
+    nth0(0, Element, Important),
     write_piece(Important).
     
 
@@ -148,13 +146,7 @@ write_piece(Piece) :-
     write(' ').
 
 write_piece(Piece) :-
-    Piece = white,
-    translate(2, Symbol),
-    write(Symbol).
-
-write_piece(Piece) :-
-    Piece = black,
-    translate(1, Symbol),
+    translate(Piece, Symbol),
     write(Symbol).
 
 write_piece(_).
@@ -164,3 +156,32 @@ get_board_length([H|T], Sum) :-
     length(H, Length),
     get_board_length(T, RestSum),
     Sum is Length + RestSum.
+
+manage_color_input(_, _, _,'b') :-
+    write('Black it is!'), nl.
+
+manage_color_input(_, _, _,'w') :-
+    write('White it is!'), nl.
+
+manage_color_input(Board,Size, N, _) :-
+    write('Invalid color!'), nl,
+    write('Please choose between "b" and "w".'), nl,
+    placement_phase_loop(Board,Size, N),
+    !.
+
+coordenates_input(X, Y, Size) :-
+        write('Row:'), read(Temp1), nl,
+        verify_input(Temp1, 0, Size, X),
+        write('Column:'), read(Temp2), nl,
+        verify_input(Temp2, 0, Size, Y).
+     
+verify_input(Value, LowerBound,UpperBound, Return) :-
+        number(Value),
+        Value >= LowerBound,
+        Value < UpperBound,
+        Return is Value.
+
+verify_input(_,LowerBound, UpperBound, Return) :-
+        write('Invalid input, try again: '),
+        read(Temp),
+        verify_input(Temp, LowerBound, UpperBound, Return).

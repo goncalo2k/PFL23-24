@@ -30,14 +30,6 @@ translate(1, X) :- char_code(X,  9679).
 disc(black).
 disc(white).
 
-position_state(0, [0,0]).
-position_state(1, [black,0]).
-position_state(2, [white,0]).
-position_state(3, [black, black]).
-position_state(4, [white, white]).
-position_state(5, [black, white]).
-position_state(6, [white, black]).
-
 initialize_board(Size, Board) :-
     S is (Size // 2),
     L is Size - 1,
@@ -65,12 +57,12 @@ place_piece(X,Y,Board,Size,Color,NewBoard) :-
     is_not_middle(X,Y,Size, X1, Y1),
     nth0(X1, Board, Row),
     nth0(Y1, Row, Cell),
-    (get_cell(X1,Y1,Board, 0) ->
+    (get_cell(X1,Y1,Board, [0,0]) ->
         (Color == 'w' -> 
-            replace(Row,Y1,1,NewRow),
+            replace(Row,Y1,[1, 0],NewRow),
             replace(Board,X1,NewRow,NewBoard)
             ;
-            replace(Row,Y1,2,NewRow),
+            replace(Row,Y1,[2, 0],NewRow),
             replace(Board,X1,NewRow,NewBoard)
         ) 
         ;
