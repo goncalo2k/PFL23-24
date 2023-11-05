@@ -158,3 +158,9 @@ write_piece(Piece) :-
     write(Symbol).
 
 write_piece(_).
+
+get_board_length([], 0).  
+get_board_length([H|T], Sum) :-
+    length(H, Length),
+    get_board_length(T, RestSum),
+    Sum is Length + RestSum.

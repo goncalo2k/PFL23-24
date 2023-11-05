@@ -6,20 +6,25 @@ start_game(P1, P2) :-
     write('What is your desired board size? Default is 9.'), nl,
     read(Size),
     initialize_board(Size,Board),
+    get_board_length(Board, Total),
+    piece_percentage(Percetage),
+    HalfPieceCount is (Total*Percetage) // 200,
     display_game(Board,Size),
     state_switch_forward,
-    placement_phase_loop(Board,Size).
+    placement_phase_loop(Board,Size, HalfPieceCount).
     %movement_phase_loop.
 
 
 %Placement Phase
-placement_phase_loop(Board,Size) :-
+placement_phase_loop(_, _, 0).
+placement_phase_loop(Board,Size, N) :-
+    write('Missing '), write(N*2), write(' pieces on the board.'),
     current_player(Player),
     (Player == black -> write('Black ') ; write('White ')),
     write('player, what is the color of the piece you want to place?'),
     nl,
     read(Color),
-    manage_color_input(Board,Size,Color),
+    manage_color_input(Board,Size, N, Color),
     coordenates_input(X, Y),
     place_piece(X,Y,Board,Size,Color,NewBoard),
     display_game(NewBoard, Size),
@@ -32,18 +37,19 @@ placement_phase_loop(Board,Size) :-
     place_piece(X1,Y1,NewBoard,Size,NewColor,LastBoard),
     display_game(LastBoard, Size),
     player_switcher,
-    placement_phase_loop(LastBoard,Size).
+    N1 is N - 1,
+    placement_phase_loop(LastBoard,Size, N1).
     
-manage_color_input(Board,Size,'b') :-
+manage_color_input(Board,Size, _,'b') :-
     write('Black it is!'), nl.
 
-manage_color_input(Board,Size,'w') :-
+manage_color_input(Board,Size, _,'w') :-
     write('White it is!'), nl.
 
-manage_color_input(Board,Size,_) :-
+manage_color_input(Board,Size, N, _) :-
     write('Invalid color!'), nl,
     write('Please choose between "b" and "w".'), nl,
-    placement_phase_loop(Board,Size),
+    placement_phase_loop(Board,Size, N),
     !.
 
 coordenates_input(X, Y) :-
