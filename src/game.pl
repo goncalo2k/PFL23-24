@@ -16,11 +16,17 @@ start_game(P1, P2) :-
     display_game(Board),
     state_switch_forward,
     placement_phase_loop(Board,Size, HalfPieceCount).
-    %movement_phase_loop.
+    %movement_phase_loop(Board,Size).
 
+movement_phase_loop(Board,Size) :-
+    display_game(Board,Size),
+    read_move(X1,Y1,X2,Y2),
+    move_piece(X1,Y1,X2,Y2,Board,NewBoard),
+    movement_phase_loop(NewBoard,Size).
 
 %Placement Phase
-placement_phase_loop(_, _, 0).
+placement_phase_loop(Board, Size, 0) :-
+    movement_phase_loop(Board,Size).
 placement_phase_loop(Board,Size, N) :-
     TempN is N*2,
     write('Missing '), write(TempN), write(' pieces on the board.'),
@@ -165,9 +171,3 @@ check_cascading_elements([_| Rest], Colour, _) :- check_cascading_elements(Rest,
 has_three_equal_elements([[_, X], [_, X], [_, X] | _], X).
 has_three_equal_elements([_ | Rest], Value) :- has_three_equal_elements(Rest, Value).
       
-
-%Movement Phase
-/*movement_phase_loop :-
-    state_switch_forward,
-    display_game(Board,Size),
-    move_piece(X,Y,Board,Size,Player,NewBoard)*/

@@ -185,3 +185,58 @@ verify_input(_,LowerBound, UpperBound, Return) :-
         write('Invalid input, try again: '),
         read(Temp),
         verify_input(Temp, LowerBound, UpperBound, Return).
+
+% get_reachable(+Board, +Row, +Column, +MaxDistance, -Reachable)
+% returns a list of reachable cells within the given maximum distance, using a breadth-first search
+get_reachable(Board, Row, Column, MaxDistance, Reachable) :-
+    bfs(Board, [(Row, Column, 0)], MaxDistance, [(Row, Column)], Reachable).
+
+% bfs(+Board, +Queue, +MaxDistance, +Visited, -Reachable)
+% performs a breadth-first search on the board, starting from the given queue of cells
+% the search is limited to the given maximum distance
+% the visited cells are stored in the Visited list
+% the reachable cells are stored in the Reachable list
+bfs(_, [], _, _, []).
+bfs(_, [(_, _, MaxDistance) | _], MaxDistance, _, []) :- !. % the maximum distance has been reached
+
+bfs(Board, [(Row, Column, Distance) | Rest], MaxDistance, Visited, Reachable) :-
+    Distance < MaxDistance, % the current cell is within the maximum distance
+    
+    get_adjacent(Board, Row, Column, Adjacent),                 % get the adjacent cells
+    subtract(Adjacent, Visited, Possible),                      % remove the visited cells
+    filter_unoccupied(Possible, Board, Unoccupied),             % remove the fully occupied cells
+
+    NewDistance is Distance + 1,
+    add_distance(Unoccupied, NewDistance, UnoccupiedWithDistance),  % associate the distance with each cell
+    
+    append(Rest, UnoccupiedWithDistance, NewRest),
+    append(Visited, Unoccupied, NewVisited),
+    
+    bfs(Board, NewRest, MaxDistance, NewVisited, NewReachable),
+    append(Unoccupied, NewReachable, Reachable).
+
+
+offsets([(1, 0), (-1, 0), (-1, -1), (0, -1), (0, 1), (-1, 1)]).
+% get_adjacent(+Board, +Row, +Column, -Adjacent)
+% returns a list of adjacent cells
+get_adjacent(Board, Row, Column, Adjacent) :-
+    offsets(Board, Row, Offsets),  
+    findall((AdjRow, AdjCol), (
+        member((DX, DY), Offsets),
+        AdjRow is Row + DY,
+        AdjCol is Column + DX,
+        get_cell(Board, AdjRow, AdjCol, _)
+    ), Adjacent).
+
+% filter_unoccupied(+List, +Board, -NewList)
+% filter_unoccupieds the given list of cells to only include cells that are not fully occupied
+filter_unoccupied([], _, []).
+
+filter_unoccupied([(Row, Column) | T], Board, [(Row, Column) | NewT]) :-
+    get_cell(Board, Row, Column, Cell),
+    length(Cell, Length),
+    Length < 2, !,
+    filter_unoccupied(T, Board, NewT).
+
+filter_unoccupied([_ | T], Board, NewT) :-
+    filter_unoccupied(T, Board, NewT).

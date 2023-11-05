@@ -71,7 +71,46 @@ place_piece(X,Y,Board,Size,Color,NewBoard) :-
         coordenates_input(NewX, NewY, Size),
         place_piece(NewX, NewY, Board, Size, Color, NewBoard))
     ).
+
+move_piece(X1,Y1,X2,Y2,Board,NewBoard) :-
+    nth0(X1, Board, Row1),
+    nth0(Y1, Row1, Cell1),
+
+    remove_element(Cell1,Val, NewCell),
     
+    replace(Row1,Y1,NewCell,NewRow1),
+    
+    replace(Board,X1,NewRow1,TempBoard),
+    
+    nth0(X2, TempBoard, Row2),
+    nth0(Y2, Row2, Cell2),    
+
+    add_element(Cell2, Val, NewCell3),
+    
+    replace(Row2,Y2,NewCell3,NewRow2),
+    
+    replace(TempBoard,X2,NewRow2,NewBoard).
+    
+remove_element(Cell, ValueStill, NewCell) :-
+    nth0(0,Cell,FirstValue),
+    nth0(1,Cell,LastVal),
+    (LastVal =:= 0 -> (ValueStill is FirstValue, replace(Cell,0,0,NewCell) ); (ValueStill is LastVal, replace(Cell,1,0,NewCell))).
+    
+add_element(Cell,Value, NewCell) :-
+    nth0(0,Cell,FirstValue),
+    nth0(1,Cell,LastVal),
+    (FirstValue =:= 0 -> replace(Cell,0,Value,NewCell) ; replace(Cell,1,Value,NewCell)).
+
+read_move(X1,Y1,X2,Y2) :-
+    write('X1:'),
+    read(X1),
+    write('Y1:'),
+    read(Y1),
+    write('X2:'),
+    read(X2),
+    write('Y2:'),
+    read(Y2).
+
 display_upper_most_row(List, Size) :-
     length(List, S),
     N is Size - S,
