@@ -50,47 +50,26 @@ write_n_times(_, _).
 
 write_every_six(Current, Size, Text1, Text2) :-
     Current =< Size,
-    Rest is Current mod 6,
-    Rest = 0,
-    write(Text1),
-    Next is Current + 1,
-    write_every_six(Next, Size, Text1, Text2).
-
-write_every_six(Current, Size, Text1, Text2) :-
-    Current =< Size,
-    Rest is Current mod 6,
-    Rest \= 0,
-    write(Text2),
+    Rest6 is Current mod 6,
+    (Rest6 = 0 -> write(Text1); write(Text2)),
     Next is Current + 1,
     write_every_six(Next, Size, Text1, Text2).
 
 write_every_six(_, _, _, _).
 
-write_every_three(Current, Size, Text1, Text2, Text3) :-
-    Current =< Size,
-    Rest is Current mod 6,
-    Rest = 0,
-    write(Text1),
-    Next is Current + 1,
-    write_every_three(Next, Size, Text1, Text2, Text3).
 
 write_every_three(Current, Size, Text1, Text2, Text3) :-
     Current =< Size,
-    Rest is Current mod 3,
-    Rest = 0,
-    write(Text3),
+    Rest3 is Current mod 3,
+    Rest6 is Current mod 6,
+    (Rest6 = 0 -> write(Text1);
+    Rest3 = 0 -> write(Text3);
+    write(Text2)),
     Next is Current + 1,
     write_every_three(Next, Size, Text1, Text2, Text3).
 
-write_every_three(Current, Size, Text1, Text2, Text3) :-
-    Current =< Size,
-    Rest is Current mod 3,
-    Rest \= 0,
-    write(Text2),
-    Next is Current + 1,
-    write_every_three(Next, Size, Text1, Text2, Text3).
+write_every_three(_, _, _, _, _).
 
-write_every_three(_,_,_,_,_).
 
 display_upper_line(List, Size, Symbol1, Symbol2, Symbol3, Symbol4, Symbol5) :-
     length(List, S),
@@ -149,8 +128,7 @@ write_piece_upper(Element) :-
 
 write_piece_lower(Element) :-
     position_state(Element, ReturnList),
-    reverse(ReturnList, Reversed),
-    last(Reversed, Important),
+    nth0(0, ReturnList, Important),
     write_piece(Important).
     
 

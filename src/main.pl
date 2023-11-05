@@ -1,3 +1,4 @@
+:-use_module(library(lists)).
 :-ensure_loaded('board.pl').
 :-ensure_loaded('game.pl').
 :-ensure_loaded('state.pl').
