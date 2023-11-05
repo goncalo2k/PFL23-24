@@ -41,3 +41,11 @@ reverse_list(List, Reversed) :-
 reverse_list_helper([], Acc, Acc).
 reverse_list_helper([Head|Tail], Acc, Reversed) :-
     reverse_list_helper(Tail, [Head|Acc], Reversed).
+
+% replace(+List, +Index, +Value, -NewList)
+% replaces the element at the given index starting from 0
+replace([_|T], 0, Value, [Value|T]).
+replace([H|T], Index, Value, [H|NewT]) :-
+    Index > 0,
+    NewIndex is Index - 1,
+    replace(T, NewIndex, Value, NewT). 

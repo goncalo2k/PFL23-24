@@ -1,4 +1,5 @@
 :-use_module(library(lists)).
+:- use_module(library(clpfd)).
 
 %%%%% Helper Characters %%%%%
 
@@ -22,15 +23,9 @@ black_disk(Symbol) :- char_code(Symbol, 9679).
 
 % translate(+CellPiece, -WritableSymbol)
 translate(0, ' ').
-translate(b, X) :- char_code(X,  9675).
-% translate(r-3, X) :- char_code(X,  9651).
-% translate(r-4, X) :- char_code(X,  9633).
-% translate(r-5, X) :- char_code(X, 11040).
+translate(2, X) :- char_code(X,  9675).
 
-translate(w, X) :- char_code(X,  9679).
-% translate(g-3, X) :- char_code(X,  9650).
-% translate(g-4, X) :- char_code(X,  9632).
-% translate(g-5, X) :- char_code(X, 11039).
+translate(1, X) :- char_code(X,  9679).
 
 disc(black).
 disc(white).
@@ -49,7 +44,39 @@ initialize_board(Size, Board) :-
 display_board(Board, Size) :-
     true.
 
+place_piece(X,Y,Board,Size,Color,NewBoard) :-
+    write(Board),
+    nl,
+    is_not_middle(X,Y,Size),
+    nth0(X, Board, Row),
+    nth0(Y, Row, Cell),
+    (get_cell(X,Y,Board, 0) ->
+        write('lol'),
+        (Color == 'w' -> 
+            write('heh'), nl,
+            replace(Row,Y,1,NewRow),
+            replace(Board,X,NewRow,NewBoard)
+            ;
+            replace(Row,Y,2,NewRow),
+            replace(Board,X,NewRow,NewBoard)
+        ) 
+        ;
+        write('Invalid move')
+    ),
+    write(NewBoard).
 
+
+get_cell(X,Y,Board,Cell) :-
+    nth0(X, Board, Row),
+    nth0(Y, Row, Cell).
+
+is_cell_empty(Cell) :-
+    Cell =:= 0.
+
+is_not_middle(X,Y,Size) :-
+    Result is Size/2,
+    Final = ceiling(Result),
+    Y =\= Final.
 
 /* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- 
 
