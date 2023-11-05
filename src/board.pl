@@ -61,7 +61,6 @@ display_game(Board, Size) :-
     display_lower_most_row(Last, Size).
 
 place_piece(X,Y,Board,Size,Color,NewBoard) :-
-    trace,
     write(Board),
     nl,
     is_not_middle(X,Y,Size),
@@ -78,7 +77,8 @@ place_piece(X,Y,Board,Size,Color,NewBoard) :-
             replace(Board,X,NewRow,NewBoard)
         ) 
         ;
-        write('Invalid move')
+        (write('Invalid move'),
+         append([], Board, NewBoard))
     ),
     write(NewBoard).
     

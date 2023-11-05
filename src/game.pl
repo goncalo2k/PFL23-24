@@ -43,4 +43,3 @@ manage_color_input(Board,Size,_) :-
     state_switch_forward,
     display_game(Board,Size),
     move_piece(X,Y,Board,Size,Player,NewBoard)*/
->>>>>>> 47c6200dc2e9291501119a70452e59255b178dda
