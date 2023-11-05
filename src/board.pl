@@ -30,7 +30,7 @@ translate(1, X) :- char_code(X,  9679).
 disc(black).
 disc(white).
 
-initialize_board(Size, Board) :-
+initial_state(Size, Board) :-
     S is (Size // 2),
     L is Size - 1,
     upper_lists(S, L, UpperLists),
