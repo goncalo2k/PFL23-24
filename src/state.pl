@@ -21,7 +21,7 @@ player(black).
 
 % Dynamic facts to determine in-game logic.
 current_game_state(menu).
-current_player(white).
+current_player(black).
 winner(_).
 
 % Facts to determine player switching.

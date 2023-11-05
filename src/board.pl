@@ -60,16 +60,14 @@ display_game(Board, Size) :-
     display_lower_rows(LowerRows, Size),
     display_lower_most_row(Last, Size).
 
-place_piece(X,Y,Board,Size,Color,NewBoard) :-
+place_piece(Y,X,Board,Size,Color,NewBoard) :-
     write(Board),
     nl,
-    is_not_middle(X,Y,Size),
+    is_not_middle(X,Y,Size, Result),
     nth0(X, Board, Row),
     nth0(Y, Row, Cell),
-    (get_cell(X,Y,Board, 0) ->
-        write('lol'),
+    ((get_cell(X,Y,Board, 0), Result = 1) ->
         (Color == 'w' -> 
-            write('heh'), nl,
             replace(Row,Y,1,NewRow),
             replace(Board,X,NewRow,NewBoard)
             ;
@@ -77,10 +75,9 @@ place_piece(X,Y,Board,Size,Color,NewBoard) :-
             replace(Board,X,NewRow,NewBoard)
         ) 
         ;
-        (write('Invalid move'),
+        (write('Invalid move'), nl,
          append([], Board, NewBoard))
-    ),
-    write(NewBoard).
+    ).
     
 display_upper_most_row(List, Size) :-
     length(List, S),
@@ -149,10 +146,17 @@ get_cell(X,Y,Board,Cell) :-
 is_cell_empty(Cell) :-
     Cell =:= 0.
 
-is_not_middle(X,Y,Size) :-
-    Result is Size/2,
-    Final = ceiling(Result),
-    Y =\= Final.
+is_not_middle(X,Y,Size, Result) :-
+    Temp is Size//2,
+    (X == Temp ->
+        ( Y == Temp ->
+                (write('You can\'t place a piece in the middle of the board!'), nl,
+                Result = 0);
+                Result = 1)
+        ;
+        Result = 1).
+
+    
 
 /* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- 
 
