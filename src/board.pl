@@ -30,7 +30,13 @@ translate(1, X) :- char_code(X,  9679).
 disc(black).
 disc(white).
 
-
+position_state(0, [0,0]).
+position_state(b, [black,0]).
+position_state(w, [white,0]).
+position_state(bb, [black, black]).
+position_state(ww, [white, white]).
+position_state(bw, [black, white]).
+position_state(wb, [white, black]).
 
 initialize_board(Size, Board) :-
     S is (Size // 2),
@@ -41,8 +47,18 @@ initialize_board(Size, Board) :-
     append(UpperLists, [List], Temp),
     append(Temp, LowerLists, Board).
 
-display_board(Board, Size) :-
-    true.
+display_game(Board, Size) :-
+    MiddleIndex is (Size + 1) // 2,
+    PreviousMiddle is MiddleIndex - 1,
+    last(Board, Last),
+    nth1(MiddleIndex, Board, Middle),
+    get_elements(Board, 0, MiddleIndex, UpperRows),
+    get_elements(Board, PreviousMiddle, MiddleIndex, LowerRows),
+    display_upper_most_row(Last, Size),
+    display_upper_rows(UpperRows, Size),
+    display_row(Middle, Size),
+    display_lower_rows(LowerRows, Size),
+    display_lower_most_row(Last, Size).
 
 place_piece(X,Y,Board,Size,Color,NewBoard) :-
     write(Board),
@@ -64,6 +80,65 @@ place_piece(X,Y,Board,Size,Color,NewBoard) :-
         write('Invalid move')
     ),
     write(NewBoard).
+    
+display_upper_most_row(List, Size) :-
+    length(List, S),
+    N is Size - S,
+    write_n_times('   ', N),
+    WriteLength is (S*6) - 1,
+    top_left_corner(Symbol1),
+    down_corner(Symbol2),
+    top_right_corner(Symbol3),
+    horizontal(Symbol4),
+    write(Symbol1),
+    write_every_six(1, WriteLength, Symbol2, Symbol4),
+    write(Symbol3),
+    nl.
+
+display_lower_most_row(List, Size) :-
+    length(List, S),
+    N is Size - S,
+    write_n_times('   ', N),
+    WriteLength is (S*6) - 1,
+    bot_left_corner(Symbol1),
+    up_corner(Symbol2),
+    bot_right_corner(Symbol3),
+    horizontal(Symbol4),
+    write(Symbol1),
+    write_every_six(1, WriteLength, Symbol2, Symbol4),
+    write(Symbol3),
+    nl.
+
+display_upper_rows([Element|Rest], Size) :-
+    Rest \= [],
+    display_row(Element, Size),
+    nth0(0, Rest, First),
+    top_left_corner(Symbol1),
+    down_corner(Symbol2),
+    top_right_corner(Symbol3),
+    horizontal(Symbol4),
+    up_corner(Symbol5),
+    display_upper_line(First, Size, Symbol1, Symbol2, Symbol3, Symbol4, Symbol5),
+    display_upper_rows(Rest, Size).
+display_upper_rows([_], _).
+
+display_lower_rows([Element|Rest], Size) :-
+    Rest \= [],
+    bot_left_corner(Symbol1),
+    up_corner(Symbol2),
+    bot_right_corner(Symbol3),
+    horizontal(Symbol4),
+    down_corner(Symbol5),
+    display_upper_line(Element, Size, Symbol1, Symbol2, Symbol3, Symbol4, Symbol5),
+    nth0(0, Rest, First),
+    display_row(First, Size),
+    display_lower_rows(Rest, Size).
+display_lower_rows([_], _).
+
+
+display_row(List, Size) :-
+    write_upper_part(List, Size),
+    write_lower_part(List, Size).    
 
 
 get_cell(X,Y,Board,Cell) :-
