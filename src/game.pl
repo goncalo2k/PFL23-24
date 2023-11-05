@@ -1,15 +1,19 @@
 /* -*- Mode:Prolog; coding:iso-8859-1; indent-tabs-mode:nil; prolog-indent-width:8; prolog-paren-indent:4; tab-width:8; -*- */
 piece_percentage(36).
 
+display_game(GameState) :-
+        length(GameState, Length),
+        display_game(GameState, Length).
 
 start_game(P1, P2) :-
-    write('What is your desired board size? Default is 9.'), nl,
-    read(Size),
+    write('What is your desired board size? Must be an odd number. Default is 9, Minimum is 5 and Maximum is 15.'), nl,
+    read(Temp),
+    verify_input(Temp, 5, 16, Size),
     initialize_board(Size,Board),
     get_board_length(Board, Total),
     piece_percentage(Percetage),
     HalfPieceCount is (Total*Percetage) // 200,
-    display_game(Board,Size),
+    display_game(Board),
     state_switch_forward,
     placement_phase_loop(Board,Size, HalfPieceCount).
     %movement_phase_loop.
@@ -25,25 +29,26 @@ placement_phase_loop(Board,Size, N) :-
     nl,
     read(Color),
     manage_color_input(Board,Size, N, Color),
-    coordenates_input(X, Y),
+    write('Where would you like to place your piece?'), nl,
+    coordenates_input(X, Y, Size),
     place_piece(X,Y,Board,Size,Color,NewBoard),
     display_game(NewBoard, Size),
     (Color == w -> NewColor = b; NewColor = w),
     (NewColor == b ->
         write('Now you\'re placing a piece of black colour');
         write('Now you\'re placing a piece of white colour')), nl,
-    (Player == black -> write('Black ') ; write('White ')),
-    coordenates_input(X1, Y1),
+    write('Where would you like to place your piece?'), nl,
+    coordenates_input(X1, Y1, Size),
     place_piece(X1,Y1,NewBoard,Size,NewColor,LastBoard),
-    display_game(LastBoard, Size),
+    display_game(LastBoard),
     player_switcher,
     N1 is N - 1,
     placement_phase_loop(LastBoard,Size, N1).
     
-manage_color_input(Board,Size, _,'b') :-
+manage_color_input(_, _, _,'b') :-
     write('Black it is!'), nl.
 
-manage_color_input(Board,Size, _,'w') :-
+manage_color_input(_, _, _,'w') :-
     write('White it is!'), nl.
 
 manage_color_input(Board,Size, N, _) :-
@@ -52,10 +57,24 @@ manage_color_input(Board,Size, N, _) :-
     placement_phase_loop(Board,Size, N),
     !.
 
-coordenates_input(X, Y) :-
-        write('Player, where would you like to place your piece?'), nl,
-        write('Row:'), read(X), nl,
-        write('Column:'), read(Y), nl.
+coordenates_input(X, Y, Size) :-
+        write('Row:'), read(Temp1), nl,
+        verify_input(Temp1, 0, Size, X),
+        write('Column:'), read(Temp2), nl,
+        verify_input(Temp2, 0, Size, Y).
+     
+verify_input(Value, LowerBound,UpperBound, Return) :-
+        number(Value),
+        Value >= LowerBound,
+        Value < UpperBound,
+        Return is Value.
+
+verify_input(_,LowerBound, UpperBound, Return) :-
+        write('Invalid input, try again: '),
+        read(Temp),
+        verify_input(Temp, LowerBound, UpperBound, Return).
+        
+
 %Movement Phase
 /*movement_phase_loop :-
     state_switch_forward,

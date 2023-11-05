@@ -150,7 +150,8 @@ is_not_middle(X,Y,Size, X1, Y1) :-
     Temp is Size//2,
     ((X == Temp, Y == Temp) ->
         write('You can\'t place a piece in the middle of the board!'), nl,
-        coordenates_input(NewX, NewY),
+        write('Where would you like to place your piece?'), nl,
+        coordenates_input(NewX, NewY, Size),
         is_not_middle(NewX, NewY, Size, X1, Y1)
         ;
         X1 = X, Y1 = Y).
