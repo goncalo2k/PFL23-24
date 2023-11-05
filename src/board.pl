@@ -60,19 +60,19 @@ display_game(Board, Size) :-
     display_lower_rows(LowerRows, Size),
     display_lower_most_row(Last, Size).
 
-place_piece(Y,X,Board,Size,Color,NewBoard) :-
+place_piece(X,Y,Board,Size,Color,NewBoard) :-
     write(Board),
     nl,
-    is_not_middle(X,Y,Size, Result),
-    nth0(X, Board, Row),
-    nth0(Y, Row, Cell),
-    ((get_cell(X,Y,Board, 0), Result = 1) ->
+    is_not_middle(X,Y,Size, X1, Y1),
+    nth0(X1, Board, Row),
+    nth0(Y1, Row, Cell),
+    (get_cell(X1,Y1,Board, 0) ->
         (Color == 'w' -> 
-            replace(Row,Y,1,NewRow),
-            replace(Board,X,NewRow,NewBoard)
+            replace(Row,Y1,1,NewRow),
+            replace(Board,X1,NewRow,NewBoard)
             ;
-            replace(Row,Y,2,NewRow),
-            replace(Board,X,NewRow,NewBoard)
+            replace(Row,Y1,2,NewRow),
+            replace(Board,X1,NewRow,NewBoard)
         ) 
         ;
         (write('Invalid move'), nl,
@@ -146,15 +146,14 @@ get_cell(X,Y,Board,Cell) :-
 is_cell_empty(Cell) :-
     Cell =:= 0.
 
-is_not_middle(X,Y,Size, Result) :-
+is_not_middle(X,Y,Size, X1, Y1) :-
     Temp is Size//2,
-    (X == Temp ->
-        ( Y == Temp ->
-                (write('You can\'t place a piece in the middle of the board!'), nl,
-                Result = 0);
-                Result = 1)
+    ((X == Temp, Y == Temp) ->
+        write('You can\'t place a piece in the middle of the board!'), nl,
+        coordenates_input(NewX, NewY),
+        is_not_middle(NewX, NewY, Size, X1, Y1)
         ;
-        Result = 1).
+        X1 = X, Y1 = Y).
 
     
 

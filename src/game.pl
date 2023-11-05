@@ -20,24 +20,15 @@ placement_phase_loop(Board,Size) :-
     nl,
     read(Color),
     manage_color_input(Board,Size,Color),
-    write('Player, where would you like to place your piece?'), nl,
-    write('Row:'), nl,
-    read(Y),
-    write('Column:'), nl,
-    read(X),
+    coordenates_input(X, Y),
     place_piece(X,Y,Board,Size,Color,NewBoard),
     display_game(NewBoard, Size),
     (Color == w -> NewColor = b; NewColor = w),
     (NewColor == b ->
         write('Now you\'re placing a piece of black colour');
-        write('Now you\'re placing a piece of white colour')),
-    nl,
+        write('Now you\'re placing a piece of white colour')), nl,
     (Player == black -> write('Black ') ; write('White ')),
-    write('Player, where would you like to place your piece?'), nl,
-    write('X:'), nl,
-    read(X1),
-    write('Y:'), nl,
-    read(Y1),
+    coordenates_input(X1, Y1),
     place_piece(X1,Y1,NewBoard,Size,NewColor,LastBoard),
     display_game(LastBoard, Size),
     player_switcher,
@@ -55,6 +46,10 @@ manage_color_input(Board,Size,_) :-
     placement_phase_loop(Board,Size),
     !.
 
+coordenates_input(X, Y) :-
+        write('Player, where would you like to place your piece?'), nl,
+        write('Row:'), read(X), nl,
+        write('Column:'), read(Y), nl.
 %Movement Phase
 /*movement_phase_loop :-
     state_switch_forward,
