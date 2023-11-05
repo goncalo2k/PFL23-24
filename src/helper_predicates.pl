@@ -149,12 +149,12 @@ write_piece(Piece) :-
 
 write_piece(Piece) :-
     Piece = white,
-    translate(w, Symbol),
+    translate(2, Symbol),
     write(Symbol).
 
 write_piece(Piece) :-
     Piece = black,
-    translate(b, Symbol),
+    translate(1, Symbol),
     write(Symbol).
 
 write_piece(_).

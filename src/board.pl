@@ -31,12 +31,12 @@ disc(black).
 disc(white).
 
 position_state(0, [0,0]).
-position_state(b, [black,0]).
-position_state(w, [white,0]).
-position_state(bb, [black, black]).
-position_state(ww, [white, white]).
-position_state(bw, [black, white]).
-position_state(wb, [white, black]).
+position_state(1, [black,0]).
+position_state(2, [white,0]).
+position_state(3, [black, black]).
+position_state(4, [white, white]).
+position_state(5, [black, white]).
+position_state(6, [white, black]).
 
 initialize_board(Size, Board) :-
     S is (Size // 2),

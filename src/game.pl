@@ -23,6 +23,8 @@ placement_phase_loop(Board,Size) :-
     write('Y:'), nl,
     read(Y),
     place_piece(X,Y,Board,Size,Color,NewBoard),
+    nl,
+    display_game(NewBoard, Size),
     player_switcher,
     placement_phase_loop(NewBoard,Size).
     
