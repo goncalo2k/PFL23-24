@@ -19,6 +19,7 @@ start_game(P1, P2) :-
     %movement_phase_loop(Board,Size).
 
 movement_phase_loop(Board,Size) :-
+    write('========Movement Phase========'), nl,
     display_game(Board,Size),
     current_player(Player),
     (Player == 'black' -> write('Black ') ; write('White ')),

@@ -85,8 +85,10 @@ move_piece(X1,Y1,X2,Y2,Board,NewBoard) :-
         (H < 2 -> add_element(Cell2, Val, NewCell3),
         replace(Row2,Y2,NewCell3,NewRow2),
         replace(TempBoard,X2,NewRow2,NewBoard),
-        player_switcher))
+        player_switcher; write('Too tall - try another cell!'),nl, append([],Board,NewBoard))
+        )
     ;
+        write('Invalid move, try again - you dont own this piece.'), nl,
         append([],Board,NewBoard)).
 
     
