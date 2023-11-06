@@ -19,30 +19,31 @@ start_game(P1, P2) :-
     %movement_phase_loop(Board,Size).
 
 movement_phase_loop(Board,Size) :-
-    (win_conditioning_check(NewBoard) -> write('Theres a winner!')),
-    write('========Movement Phase========'), nl,
+    (win_conditioning_check(Board, Winner) -> state_switch_forward, state_win_checker(Winner));
+    (write('========Movement Phase========'), nl,
     display_game(Board,Size),
     current_player(Player),
     (Player == 'black' -> write('Black ') ; write('White ')),
     write('player, what is your next move?'),nl,
     read_move(X1,Y1,X2,Y2),
-    (move_piece(X1,Y1,X2,Y2,Board,NewBoard) -> movement_phase_loop(NewBoard,Size)
+    (move(X1,Y1,X2,Y2,Board,NewBoard) -> movement_phase_loop(NewBoard,Size)
     ;
-    movement_phase_loop(NewBoard,Size,_)
-    ).
+    movement_phase_loop(Board,Size,_)
+    )).
     
 
-movement_phase_loop(Board,Size_) :-
+movement_phase_loop(Board,Size,_) :-
         write('Error: Bad Movement '), nl, skip_line,
         movement_phase_loop(Board,Size).
->>>>>>> 30d9f21d22abcd3fd2424d4258101dbbbde27123
 
 %Placement Phase
 placement_phase_loop(Board, Size, 0) :-
     current_player(Player),
+    state_switch_forward,
     (Player == black -> (player_switcher,movement_phase_loop(Board,Size));movement_phase_loop(Board,Size)).
     
 placement_phase_loop(Board,Size, N) :-
+    N > 0,
     TempN is N*2,
     write('Missing '), write(TempN), write(' pieces on the board.'),
     current_player(Player),
@@ -67,9 +68,12 @@ placement_phase_loop(Board,Size, N) :-
     N1 is N - 1,
     placement_phase_loop(LastBoard,Size, N1).
 
-win_conditioning_check(Board) :-
-        check_win(Board, 1);
-        check_win(Board, 2).
+win_conditioning_check(Board, Winner) :-
+        (check_win(Board, 1),
+         Winner = white)
+        ;
+        (check_win(Board, 2),
+         Winner = black).
 
 check_win(Board, Colour) :-
         check_each_row(Board, Colour);

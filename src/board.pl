@@ -72,7 +72,7 @@ place_piece(X,Y,Board,Size,Color,NewBoard) :-
         place_piece(NewX, NewY, Board, Size, Color, NewBoard))
     ).
 
-move_piece(X1,Y1,X2,Y2,Board,NewBoard) :-
+move(X1,Y1,X2,Y2,Board,NewBoard) :-
     nth0(X1, Board, Row1),
     nth0(Y1, Row1, Cell1),
     (check_piece_ownership(Cell1) -> 

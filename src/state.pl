@@ -38,14 +38,13 @@ state_win_decider(end_game, white, white_wins).
 state_win_decider(end_game, black, black_wins).
 
 % Rule to evaluate the existance of a winner.
-state_win_checker :-
+state_win_checker(Player) :-
         current_game_state(CurrentState),
-        current_player(CurrentPlayer),
-        state_win_decider(CurrentState, CurrentPlayer, FinalState),
+        state_win_decider(CurrentState, Player, FinalState),
         retract(winner(_)),
         retract(current_game_state(CurrentState)),
         asserta(current_game_state(FinalState)),
-        asserta(winner(CurrentPlayer)).
+        asserta(winner(Player)).
 
 state_win_checker.
 
