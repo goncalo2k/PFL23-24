@@ -22,7 +22,8 @@ movement_phase_loop(Board,Size) :-
     display_game(Board,Size),
     read_move(X1,Y1,X2,Y2),
     move_piece(X1,Y1,X2,Y2,Board,NewBoard),
-    movement_phase_loop(NewBoard,Size).
+    (win_conditioning_check(NewBoard) -> write('Theres a winner!');
+    movement_phase_loop(NewBoard,Size)).
 
 %Placement Phase
 placement_phase_loop(Board, Size, 0) :-
@@ -53,14 +54,12 @@ placement_phase_loop(Board,Size, N) :-
     placement_phase_loop(LastBoard,Size, N1).
 
 win_conditioning_check(Board) :-
-        check_win(Board, w),
+        check_win(Board, w);
         check_win(Board, b).
 
 check_win(Board, Colour) :-
         check_each_row(Board, Colour);
         check_diagonals(Board, Colour).
-
-check_win(_, _).
 
 check_each_row([First | Rest], Colour) :-
         First \= [],
@@ -68,6 +67,7 @@ check_each_row([First | Rest], Colour) :-
         check_each_row(Rest, Colour).
 
 check_row(List, Colour) :-
+        trace,
         (Colour == w ->
                 has_three_equal_elements(List, 1),
                 state_switch_forward;
@@ -93,7 +93,27 @@ check_middle_diagonal(Up, Mid, Down, Colour) :-
         length(Mid, N2),
         length(Down, N3),
         N2 = N1 + 1,
-        N1 = N3.
+        N1 = N3,
+        compare_v_shape(Up, Down, Mid, Colour).
+
+compare_v_shape(A, B, [_|C], Colour) :-
+        ((nth0(0, A, Elem1),
+         nth0(1, B, Elem2),
+         nth0(0, C, Elem3),
+         Elem1 = Elem2,
+         Elem2 = Elem3,
+         Elem1 = Colour);
+         (nth0(1, A, Elem1),
+          nth0(0, B, Elem2),
+          nth0(0, C, Elem3),
+          Elem1 = Elem2,
+         Elem2 = Elem3,
+         Elem1 = Colour));
+        (length(A, N),
+         S is N-1,
+         get_elements(A, 1, S, Elems),
+         get_elements(B, 1, S, Elems2),
+         compare_v_shape(Elems, Elems2, C, Colour)). 
         
 
 check_diagonal_dropping_right(UpperHalf, BottomHalf, Colour) :-
