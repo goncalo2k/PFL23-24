@@ -1,4 +1,5 @@
 :-use_module(library(lists)).
+:-use_module(library(random)).
 :-ensure_loaded('board.pl').
 :-ensure_loaded('game.pl').
 :-ensure_loaded('state.pl').
@@ -33,7 +34,7 @@ manage_input(1) :-
     !.
 
 manage_input(2) :-
-    %start_game('P','C'),
+    start_game('P','C'),
     main_menu_loop,
     !.
 

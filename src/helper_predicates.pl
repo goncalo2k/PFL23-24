@@ -174,7 +174,18 @@ coordenates_input(X, Y, Size) :-
         verify_input(Temp1, 0, Size, X),
         write('Column:'), read(Temp2), nl,
         verify_input(Temp2, 0, Size, Y).
-     
+
+verify_secondary_input(Value, LowerBound,UpperBound, Return) :-
+        number(Value),
+        Value >= LowerBound,
+        Value =< UpperBound,
+        Return is Value.
+
+verify_secondary_input(_,LowerBound, UpperBound, Return) :-
+        write('Invalid input, try again: '),
+        read(Temp),
+        verify_secondary_input(Temp, LowerBound, UpperBound, Return).
+
 verify_input(Value, LowerBound,UpperBound, Return) :-
         number(Value),
         Value >= LowerBound,
