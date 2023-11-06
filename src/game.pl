@@ -21,7 +21,7 @@ start_game(P1, P2) :-
     %movement_phase_loop(Board,Size).
 
 movement_phase_loop(Board,Size) :-
-    (win_conditioning_check(Board, Winner) -> state_switch_forward, state_win_checker(Winner));
+    (game_over(Board, Winner) -> state_switch_forward, state_win_checker(Winner));
     (write('========Movement Phase========'), nl,
     display_game(Board,Size),
     current_player(Player),
@@ -70,7 +70,7 @@ placement_phase_loop(Board,Size, N) :-
     N1 is N - 1,
     placement_phase_loop(LastBoard,Size, N1).
 
-win_conditioning_check(Board, Winner) :-
+game_over(Board, Winner) :-
         (check_win(Board, 1),
          Winner = white)
         ;
