@@ -201,7 +201,6 @@ bfs(_, [(_, _, MaxDistance) | _], MaxDistance, _, []) :- !. % the maximum distan
 
 bfs(Board, [(Row, Column, Distance) | Rest], MaxDistance, Visited, Reachable) :-
     Distance < MaxDistance, % the current cell is within the maximum distance
-    
     get_adjacent(Board, Row, Column, Adjacent),                 % get the adjacent cells
     subtract(Adjacent, Visited, Possible),                      % remove the visited cells
     filter_unoccupied(Possible, Board, Unoccupied),             % remove the fully occupied cells
@@ -213,30 +212,48 @@ bfs(Board, [(Row, Column, Distance) | Rest], MaxDistance, Visited, Reachable) :-
     append(Visited, Unoccupied, NewVisited),
     
     bfs(Board, NewRest, MaxDistance, NewVisited, NewReachable),
-    append(Unoccupied, NewReachable, Reachable).
+    append(Unoccupied, NewReachable, Reachable)
+    .
 
 
 offsets([(1, 0), (-1, 0), (-1, -1), (0, -1), (0, 1), (-1, 1)]).
 % get_adjacent(+Board, +Row, +Column, -Adjacent)
 % returns a list of adjacent cells
 get_adjacent(Board, Row, Column, Adjacent) :-
-    offsets(Board, Row, Offsets),  
+    offsets(Offsets),
     findall((AdjRow, AdjCol), (
         member((DX, DY), Offsets),
         AdjRow is Row + DY,
         AdjCol is Column + DX,
-        get_cell(Board, AdjRow, AdjCol, _)
-    ), Adjacent).
+        get_cell(AdjRow, AdjCol, Board, _)
+    ), Adjacent),
+    write('adj exit').
 
 % filter_unoccupied(+List, +Board, -NewList)
 % filter_unoccupieds the given list of cells to only include cells that are not fully occupied
 filter_unoccupied([], _, []).
 
 filter_unoccupied([(Row, Column) | T], Board, [(Row, Column) | NewT]) :-
-    get_cell(Board, Row, Column, Cell),
-    length(Cell, Length),
-    Length < 2, !,
+    get_cell(Row, Column, Board, Cell),
+    check_height(Cell, Height),
+    Height < 2, !,
     filter_unoccupied(T, Board, NewT).
 
 filter_unoccupied([_ | T], Board, NewT) :-
     filter_unoccupied(T, Board, NewT).
+
+% subtract(+List1, +List2, -NewList)
+% subtracts the elements of the second list from the first list (List1\List2)
+subtract([], _, []) :- !.
+
+subtract([A|T], B, R) :-
+    memberchk(A, B), !,
+    subtract(T, B, R).
+
+subtract([A|T], B, [A|R]) :-
+    subtract(T, B, R).
+
+add_distance([], _, []).
+
+add_distance([(Row, Column) | T], Distance, [(Row, Column, Distance) | NewT]) :-
+    add_distance(T, Distance, NewT).

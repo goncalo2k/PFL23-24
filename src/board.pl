@@ -75,21 +75,30 @@ place_piece(X,Y,Board,Size,Color,NewBoard) :-
 move_piece(X1,Y1,X2,Y2,Board,NewBoard) :-
     nth0(X1, Board, Row1),
     nth0(Y1, Row1, Cell1),
-    (check_piece_ownership(Cell1) -> 
-        (remove_element(Cell1,Val, NewCell),
-        replace(Row1,Y1,NewCell,NewRow1),
-        replace(Board,X1,NewRow1,TempBoard),
-        nth0(X2, TempBoard, Row2),
-        nth0(Y2, Row2, Cell2),
-        check_height(Cell2, H),
-        (H < 2 -> add_element(Cell2, Val, NewCell3),
-        replace(Row2,Y2,NewCell3,NewRow2),
-        replace(TempBoard,X2,NewRow2,NewBoard),
-        player_switcher; write('Too tall - try another cell!'),nl, append([],Board,NewBoard))
-        )
+    check_height(Cell1,H1),
+    write('aaa'),
+    get_reachable(Board,X1,Y1,H1,Reachable),
+    write('zzzzz'),
+    (memberchk((X2,Y2),Reachable) ->
+        (check_piece_ownership(Cell1) -> 
+            (remove_element(Cell1,Val, NewCell),
+            replace(Row1,Y1,NewCell,NewRow1),
+            replace(Board,X1,NewRow1,TempBoard),
+            nth0(X2, TempBoard, Row2),
+            nth0(Y2, Row2, Cell2),
+            check_height(Cell2, H2),
+            (H2 < 2 -> add_element(Cell2, Val, NewCell3),
+            replace(Row2,Y2,NewCell3,NewRow2),
+            replace(TempBoard,X2,NewRow2,NewBoard),
+            player_switcher; write('Too tall - try another cell!'),nl, append([],Board,NewBoard))
+            )
+        ;
+            write('Invalid move, try again - you dont own this piece.'), nl,
+            append([],Board,NewBoard))
     ;
-        write('Invalid move, try again - you dont own this piece.'), nl,
-        append([],Board,NewBoard)).
+    write('Invalid move, try again - the piece you are trying to reach is not reachable.'), nl,
+            append([],Board,NewBoard)
+    ).
 
     
 check_height(Piece, H) :-
