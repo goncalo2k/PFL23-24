@@ -93,7 +93,7 @@ move_piece(X1,Y1,X2,Y2,Board,NewBoard) :-
 check_height(Piece, H) :-
     nth0(1,Piece,TopVal),
     nth0(0,Piece,BotVal),
-    (TopVal \= 1 -> H is 2 ; (BotVal \= 0 -> H is 1 ; H is 0))
+    (TopVal \= 0 -> H is 2 ; (BotVal \= 0 -> H is 1 ; H is 0))
     .
 
 
