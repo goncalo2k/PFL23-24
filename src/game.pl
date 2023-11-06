@@ -15,7 +15,9 @@ start_game(P1, P2) :-
     HalfPieceCount is (Total*Percetage) // 200,
     display_game(Board),
     state_switch_forward,
-    placement_phase_loop(Board,Size, HalfPieceCount).
+    placement_phase_loop(Board,Size, HalfPieceCount),
+    winner(Winner),
+    write('Congratulations! The '), write(Winner), write(' player won the game!').
     %movement_phase_loop(Board,Size).
 
 movement_phase_loop(Board,Size) :-
