@@ -240,3 +240,123 @@ filter_unoccupied([(Row, Column) | T], Board, [(Row, Column) | NewT]) :-
 
 filter_unoccupied([_ | T], Board, NewT) :-
     filter_unoccupied(T, Board, NewT).
+
+check_each_row([First | Rest], Colour) :-
+        First \= [],
+        (check_row(First, Colour);
+        check_each_row(Rest, Colour)).
+
+check_row(List, Colour) :-
+        has_three_equal_elements(List, Colour),
+        state_switch_forward.
+
+check_diagonals(Board, Colour) :-
+        length(Board, Size),
+        Middle is (Size + 1)//2,
+        NumOfBottom is Middle - 1,
+        get_elements(Board, 0, Middle, UpperHalf),
+        get_elements(Board, NumOfBottom, Middle, BottomHalf),
+        nth0(1, BottomHalf, LastMiddle),
+        nth0(0, BottomHalf, MidMiddle),
+        reverse(UpperHalf, ReversedUp),
+        nth0(1, ReversedUp, FirstMiddle),
+        (check_diagonal_dropping_right(UpperHalf, BottomHalf, Colour);
+        check_diagonal_dropping_left(UpperHalf, BottomHalf, Colour);
+         check_middle_diagonal(FirstMiddle, MidMiddle, LastMiddle, Colour)).
+
+check_middle_diagonal(Up, Mid, Down, Colour) :-
+        length(Up, N1),
+        length(Mid, N2),
+        length(Down, N3),
+        N2 = N1 + 1,
+        N1 = N3,
+        compare_v_shape(Up, Down, Mid, Colour).
+
+compare_v_shape(A, B, [_|C], Colour) :-
+        ((nth0(0, A, Elem1),
+         nth0(1, B, Elem2),
+         nth0(0, C, Elem3),
+         Elem1 = Elem2,
+         Elem2 = Elem3,
+         Elem1 = Colour);
+         (nth0(1, A, Elem1),
+          nth0(0, B, Elem2),
+          nth0(0, C, Elem3),
+          Elem1 = Elem2,
+         Elem2 = Elem3,
+         Elem1 = Colour));
+        (length(A, N),
+         S is N-1,
+         get_elements(A, 1, S, Elems),
+         get_elements(B, 1, S, Elems2),
+         compare_v_shape(Elems, Elems2, C, Colour)). 
+        
+
+check_diagonal_dropping_right(UpperHalf, BottomHalf, Colour) :-
+        reverse(BottomHalf, ReversedDown),
+        (check_half_right(UpperHalf, Colour);
+         check_half_left(ReversedDown, Colour)).
+
+check_diagonal_dropping_left(UpperHalf, BottomHalf, Colour) :-
+        reverse(BottomHalf, ReversedDown),
+        (check_half_left(UpperHalf, Colour);
+         check_half_right(ReversedDown, Colour)).
+
+check_half_right(List, Colour) :-
+        (check_cascading_elements(List, Colour, 0),
+        state_switch_forward);
+        (length(List, N),
+        N > 0,
+        S is N - 1,
+        get_elements(List, Colour, S, Next),
+        check_half_right(Next, Colour)).
+
+check_half_left(List, Colour) :-
+        (check_same_n_elements(List, Colour, 0),
+         state_switch_forward);
+        (length(List, N),
+        N > 0,
+        S is N - 1,
+        get_elements(List, 1, S, Next),
+        check_half_left(Next, Colour)).
+        
+check_same_n_elements([A,B,C|_], Colour, Starting) :-
+        length(A, Length),
+        Starting < Length,
+        ((nth0(Starting, A, Elem1),
+        nth0(Starting, B, Elem2),
+        nth0(Starting, C, Elem3),
+        last(Elem1 , One),
+        last(Elem2 , Two),
+        last(Elem3 , Three),
+        One = Two,
+        Two = Three,
+        One = Colour);
+        (Next is Starting + 1,
+        check_same_n_elements([A, B, C], Colour, Next))).
+check_same_n_elements([_ | Rest], Colour, _) :- check_same_n_elements(Rest, Colour, 0).
+        
+
+check_cascading_elements([A, B, C | _], Colour, Starting) :-
+        length(A, Length),
+        Starting < Length,
+        ((Second is Starting + 1,
+        Third is Starting + 2,
+        nth0(Starting, A, Elem1),
+        nth0(Second, B, Elem2),
+        nth0(Third, C, Elem3),
+        last(Elem1 , One),
+        last(Elem2 , Two),
+        last(Elem3 , Three),
+        One = Two,
+        Two = Three,
+        One = Colour);
+        (Next is Starting + 1,
+        check_cascading_elements([A, B, C], Colour, Next))).
+check_cascading_elements([_| Rest], Colour, _) :- check_cascading_elements(Rest, Colour, 0).
+       
+        
+        
+
+has_three_equal_elements([[_, X], [_, X], [_, X] | _], X).
+has_three_equal_elements([_ | Rest], Value) :- has_three_equal_elements(Rest, Value).
