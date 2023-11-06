@@ -80,16 +80,21 @@ move_piece(X1,Y1,X2,Y2,Board,NewBoard) :-
         replace(Row1,Y1,NewCell,NewRow1),
         replace(Board,X1,NewRow1,TempBoard),
         nth0(X2, TempBoard, Row2),
-        nth0(Y2, Row2, Cell2),    
-        add_element(Cell2, Val, NewCell3),
+        nth0(Y2, Row2, Cell2),
+        check_height(Cell2, H),
+        (H < 2 -> add_element(Cell2, Val, NewCell3),
         replace(Row2,Y2,NewCell3,NewRow2),
         replace(TempBoard,X2,NewRow2,NewBoard),
-        player_switcher)
+        player_switcher))
     ;
         append([],Board,NewBoard)).
 
     
-    
+check_height(Piece, H) :-
+    nth0(1,Piece,TopVal),
+    nth0(0,Piece,BotVal),
+    (TopVal \= 1 -> H is 2 ; (BotVal \= 0 -> H is 1 ; H is 0))
+    .
 
 
 check_piece_ownership(Piece) :-
