@@ -75,21 +75,30 @@ place_piece(X,Y,Board,Size,Color,NewBoard) :-
 move_piece(X1,Y1,X2,Y2,Board,NewBoard) :-
     nth0(X1, Board, Row1),
     nth0(Y1, Row1, Cell1),
+    (check_piece_ownership(Cell1) -> 
+        (remove_element(Cell1,Val, NewCell),
+        replace(Row1,Y1,NewCell,NewRow1),
+        replace(Board,X1,NewRow1,TempBoard),
+        nth0(X2, TempBoard, Row2),
+        nth0(Y2, Row2, Cell2),    
+        add_element(Cell2, Val, NewCell3),
+        replace(Row2,Y2,NewCell3,NewRow2),
+        replace(TempBoard,X2,NewRow2,NewBoard),
+        player_switcher)
+    ;
+        append([],Board,NewBoard)).
 
-    remove_element(Cell1,Val, NewCell),
     
-    replace(Row1,Y1,NewCell,NewRow1),
     
-    replace(Board,X1,NewRow1,TempBoard),
-    
-    nth0(X2, TempBoard, Row2),
-    nth0(Y2, Row2, Cell2),    
 
-    add_element(Cell2, Val, NewCell3),
-    
-    replace(Row2,Y2,NewCell3,NewRow2),
-    
-    replace(TempBoard,X2,NewRow2,NewBoard).
+
+check_piece_ownership(Piece) :-
+    nth0(1,Piece,TopVal),
+    nth0(0,Piece,BotVal),
+    current_player(Player),
+    (TopVal == 0 -> ((BotVal == 2, Player == black); (BotVal == 1, Player == white))
+     ; 
+    ((TopVal == 2, Player == black);(TopVal == 1, Player == white))).
     
 remove_element(Cell, ValueStill, NewCell) :-
     nth0(0,Cell,FirstValue),

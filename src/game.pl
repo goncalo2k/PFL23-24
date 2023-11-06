@@ -20,13 +20,25 @@ start_game(P1, P2) :-
 
 movement_phase_loop(Board,Size) :-
     display_game(Board,Size),
+    current_player(Player),
+    (Player == 'black' -> write('Black ') ; write('White ')),
+    write('player, what is your next move?'),nl,
     read_move(X1,Y1,X2,Y2),
-    move_piece(X1,Y1,X2,Y2,Board,NewBoard),
-    movement_phase_loop(NewBoard,Size).
+    (move_piece(X1,Y1,X2,Y2,Board,NewBoard) -> movement_phase_loop(NewBoard,Size)
+    ;
+    movement_phase_loop(NewBoard,Size,_)
+    ).
+    
+
+movement_phase_loop(Board,Size_) :-
+        write('Error: Bad Movement '), nl, skip_line,
+        movement_phase_loop(Board,Size).
 
 %Placement Phase
 placement_phase_loop(Board, Size, 0) :-
-    movement_phase_loop(Board,Size).
+    current_player(Player),
+    (Player == black -> (player_switcher,movement_phase_loop(Board,Size));movement_phase_loop(Board,Size)).
+    
 placement_phase_loop(Board,Size, N) :-
     TempN is N*2,
     write('Missing '), write(TempN), write(' pieces on the board.'),
