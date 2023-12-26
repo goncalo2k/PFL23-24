@@ -15,18 +15,22 @@ start_game('P', 'P') :-
     HalfPieceCount is (Total*Percetage) // 200,
     display_game(Board),
     state_switch_forward,
-    placement_phase_loop(Board,Size, HalfPieceCount).
+    placement_phase_loop(Board,Size, HalfPieceCount),
+    winner(Winner),
+    write('Congratulations! The '), write(Winner), write(' player won the game!').
 
 movement_phase_loop(Board,Size) :-
+    (game_over(Board, Winner) -> state_switch_forward, state_win_checker(Winner));
+    (write('========Movement Phase========'), nl,
     display_game(Board,Size),
     current_player(Player),
     (Player == 'black' -> write('Black ') ; write('White ')),
     write('player, what is your next move?'),nl,
     read_move(X1,Y1,X2,Y2),
-    (move_piece(X1,Y1,X2,Y2,Board,NewBoard) -> movement_phase_loop(NewBoard,Size)
+    (move(X1,Y1,X2,Y2,Board,NewBoard) -> movement_phase_loop(NewBoard,Size)
     ;
-    movement_phase_loop(NewBoard,Size,_)
-    ).
+    movement_phase_loop(Board,Size,_)
+    )).
     
 
 movement_phase_loop(Board,Size,_) :-
@@ -39,6 +43,7 @@ placement_phase_loop(Board, Size, 0) :-
     (Player == black -> (player_switcher,write('========Movement Phase========'), nl,movement_phase_loop(Board,Size));(write('========Movement Phase========'), nl,movement_phase_loop(Board,Size))).
     
 placement_phase_loop(Board,Size, N) :-
+    N > 0,
     TempN is N*2,
     write('Missing '), write(TempN), write(' pieces on the board.'),
     current_player(Player),
@@ -135,7 +140,7 @@ movement_phase_loop_bot(Board,Size,PColor) :-
         ((Player == 'black' -> write('Black ') ; write('White ')),
         write('player, what is your next move?'),nl,
         read_move(X1,Y1,X2,Y2),
-        (move_piece(X1,Y1,X2,Y2,Board,NewBoard) -> movement_phase_loop_bot(NewBoard,Size,PColor)
+        (move(X1,Y1,X2,Y2,Board,NewBoard) -> movement_phase_loop_bot(NewBoard,Size,PColor)
         ;
         movement_phase_loop_bot(NewBoard,Size,PColor,_)
         ))
@@ -143,15 +148,13 @@ movement_phase_loop_bot(Board,Size,PColor) :-
         (
         get_random_piece(Board,Size,X1,Y1),
         get_random_play(Board,Size,X2,Y2),
-        (move_piece(X1,Y1,X2,Y2,Board,NewBoard) -> (movement_phase_loop_bot(NewBoard,Size,PColor))
+        (move(X1,Y1,X2,Y2,Board,NewBoard) -> (movement_phase_loop_bot(NewBoard,Size,PColor))
         ;
-        movement_phase_loop_bot(NewBoard,Size,PColor,_)
+        append([], Board, NewBoard),
+        movement_phase_loop_bot(NewBoard,Size,PColor)
         ))
     ).
 
-movement_phase_loop_bot(Board,Size,PColor,_) :-
-        write('Error: Bad Movement '), nl,
-        movement_phase_loop_bot(Board,Size,PColor).
 
 get_random_color(Color) :-
         random(0,2, C),
@@ -170,119 +173,14 @@ get_random_piece(Board,Size,X1,Y1) :-
 win_conditioning_check(Board) :-
         check_win(Board, w),
         check_win(Board, b).
+game_over(Board, Winner) :-
+        (check_win(Board, 1),
+         Winner = white)
+        ;
+        (check_win(Board, 2),
+         Winner = black).
 
 check_win(Board, Colour) :-
         check_each_row(Board, Colour);
         check_diagonals(Board, Colour).
-
-check_win(_, _).
-
-check_each_row([First | Rest], Colour) :-
-        First \= [],
-        check_row(First, Colour),
-        check_each_row(Rest, Colour).
-
-check_row(List, Colour) :-
-        (Colour == w ->
-                has_three_equal_elements(List, 1),
-                state_switch_forward;
-                has_three_equal_elements(List, 2),
-                state_switch_forward).
-
-check_diagonals(Board, Colour) :-
-        length(Board, Size),
-        Middle is (Size + 1)//2,
-        NumOfBottom is Middle - 1,
-        get_elements(Board, 0, Middle, UpperHalf),
-        get_elements(Board, NumOfBottom, Middle, BottomHalf),
-        nth0(1, BottomHalf, LastMiddle),
-        nth0(0, BottomHalf, MidMiddle),
-        reverse(UpperHalf, ReversedUp),
-        nth0(1, ReversedUp, FirstMiddle),
-        (check_diagonal_dropping_right(UpperHalf, BottomHalf, Colour);
-        check_diagonal_dropping_left(UpperHalf, BottomHalf, Colour);
-         check_middle_diagonal(FirstMiddle, MidMiddle, LastMiddle, Colour)).
-
-check_middle_diagonal(Up, Mid, Down, Colour) :-
-        length(Up, N1),
-        length(Mid, N2),
-        length(Down, N3),
-        N2 = N1 + 1,
-        N1 = N3.
-        
-
-check_diagonal_dropping_right(UpperHalf, BottomHalf, Colour) :-
-        reverse(BottomHalf, ReversedDown),
-        (check_half_right(UpperHalf, Colour);
-         check_half_left(ReversedDown, Colour)).
-
-check_diagonal_dropping_left(UpperHalf, BottomHalf, Colour) :-
-        reverse(BottomHalf, ReversedDown),
-        (check_half_left(UpperHalf, Colour);
-         check_half_right(ReversedDown, Colour)).
-
-check_half_right(List, Colour) :-
-        length(List, N),
-        N > 0,
-        S is N - 1,
-        (Colour == w ->
-                check_cascading_elements(List, 1, 0),
-                state_switch_forward;
-                check_cascading_elements(List, 2, 0),
-                state_switch_forward),
-        get_elements(List, 1, S, Next),
-        check_half_right(Next, Colour).
-
-check_half_left(List, Colour) :-
-        length(List, N),
-        N > 0,
-        S is N - 1,
-        (Colour == w ->
-                check_same_n_elements(List, 1, 0),
-                state_switch_forward;
-                check_same_n_elements(List, 2, 0),
-                state_switch_forward),
-        get_elements(List, 1, S, Next),
-        check_half_left(Next, Colour).
-        
-check_same_n_elements([A,B,C|_], Colour, Starting) :-
-        length(A, Length),
-        Starting < Length,
-        ((nth0(Starting, A, Elem1),
-        nth0(Starting, B, Elem2),
-        nth0(Starting, C, Elem3),
-        last(Elem1 , One),
-        last(Elem2 , Two),
-        last(Elem3 , Three),
-        One = Two,
-        Two = Three,
-        One = Colour);
-        (Next is Starting + 1,
-        check_same_n_elements([A, B, C], Colour, Next))).
-check_same_n_elements([_ | Rest], Colour, _) :- check_same_n_elements(Rest, Colour, 0).
-        
-
-check_cascading_elements([A, B, C | _], Colour, Starting) :-
-        length(A, Length),
-        Starting < Length,
-        ((Second is Starting + 1,
-        Third is Starting + 2,
-        nth0(Starting, A, Elem1),
-        nth0(Second, B, Elem2),
-        nth0(Third, C, Elem3),
-        last(Elem1 , One),
-        last(Elem2 , Two),
-        last(Elem3 , Three),
-        One = Two,
-        Two = Three,
-        One = Colour);
-        (Next is Starting + 1,
-        check_cascading_elements([A, B, C], Colour, Next))).
-check_cascading_elements([_| Rest], Colour, _) :- check_cascading_elements(Rest, Colour, 0).
-       
-        
-        
-
-has_three_equal_elements([[_, X], [_, X], [_, X] | _], X).
-has_three_equal_elements([_ | Rest], Value) :- has_three_equal_elements(Rest, Value).
       
