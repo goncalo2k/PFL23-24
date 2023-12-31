@@ -11,10 +11,35 @@ data Inst =
   deriving Show
 type Code = [Inst]
 
-data Val = IntVal Integer | TT | FF
+data Val = CharVal Char | IntVal Integer | TT | FF
     deriving (Eq, Show)
 
 type Stack = [Val]
+
+-- Add a new element to the top of the stack
+push :: Val -> Stack -> Stack
+push x xs = x : xs
+
+-- Remove the top element from the stack
+pop :: Stack -> Stack
+pop (_:xs) = xs
+pop _ = error "Run-time error"
+
+-- Return the top element of the stack
+top :: Stack -> Val
+top (x:_) = x
+top _ = error "Run-time error"
+
+-- Create an empty stack
+empty :: Stack
+empty = []
+
+-- Check if the stack is empty
+isEmpty :: Stack -> Bool
+isEmpty [] = True
+isEmpty _  = False
+
+
 type State = [(String, Val)]
 
 createEmptyStack :: Stack
@@ -104,6 +129,13 @@ main = do
        result7 = boolToString (testAssembler [Push (-20),Push (-21), Le] == ("True",""))
        result8 = boolToString (testAssembler [Push 5,Store "x",Push 1,Fetch "x",Sub,Store "x"] == ("","x=4"))
        result9 = tupleToString (testAssembler [Push 10,Store "i",Push 1,Store "fact",Loop [Push 1,Fetch "i",Equ,Neg] [Fetch "i",Fetch "fact",Mult,Store "fact",Push 1,Fetch "i",Sub,Store "i"]])
+       result10 = boolToString(testParser "x := 5; x := x - 1;" == ("","x=4"))
+       result11 = boolToString(testParser "if (not True and 2 <= 5 = 3 == 4) then x :=1; else y := 2;" == ("","y=2"))
+       result12 = boolToString(testParser "x := 42; if x <= 43 then x := 1; else (x := 33; x := x+1;)" == ("","x=1"))
+       result13 = boolToString(testParser "x := 42; if x <= 43 then x := 1; else x := 33; x := x+1;" == ("","x=2"))
+       result14 = boolToString(testParser "x := 42; if x <= 43 then x := 1; else x := 33; x := x+1; z := x+x;" == ("","x=2,z=4"))
+       result15 = boolToString(testParser "x := 2; y := (x - 3)*(4 + 2*3); z := x +x*(2);" == ("","x=2,y=-10,z=6"))
+       result16 = boolToString(testParser "i := 10; fact := 1; while (not(i == 1)) do (fact := fact * i; i := i - 1;);" == ("","fact=3628800,i=1") )
 
    putStrLn ("result1: " ++ result1)
    putStrLn ("result2: " ++ result2)
@@ -114,6 +146,13 @@ main = do
    putStrLn ("result7: " ++ result7)
    putStrLn ("result8: " ++ result8)
    putStrLn ("result9: " ++ result9)
+   putStrLn ("result10: " ++ result10)
+   putStrLn ("result11: " ++ result11)
+   putStrLn ("result12: " ++ result12)
+   putStrLn ("result13: " ++ result13)
+   putStrLn ("result14: " ++ result14)
+   putStrLn ("result15: " ++ result15)
+   putStrLn ("result16: " ++ result16) 
 
 
 -- If you test:
@@ -130,18 +169,19 @@ main = do
 data Expr = AExp Aexp Aexp | BExp Bexp Bexp
     deriving (Show, Eq)
 
-data Aexp = Const Integer
-          | Var String
+data Aexp = CONST Integer
+          | VAR String
           | ADD Aexp Aexp
           | SUB Aexp Aexp
           | MUL Aexp Aexp
           deriving (Show, Eq)
 
-data Bexp = BoolConst Bool
+data Bexp = BOOLCONST Bool
           | AND Bexp Bexp
-          | OR Bexp Bexp
           | NOT Bexp
-          | EQ Expr
+          | INTEQ Aexp Aexp
+          | LEINT Aexp Aexp
+          | BOOLEQ Bexp Bexp
           deriving (Show, Eq)
 
 data Stm = ASS String Aexp
@@ -150,8 +190,128 @@ data Stm = ASS String Aexp
          | SEQ [Stm]
          deriving (Show, Eq)
 
-
 type Program = [Stm]
+
+-- Lexer
+data Token = IntegerToken Integer
+           | PlusToken            -- +
+           | MultToken           -- *
+           | MinusToken           -- -
+           | OpenPToken           -- (
+           | ClosedPToken         -- )
+           | IfToken              -- if
+           | ThenToken            -- then
+           | ElseToken            -- else
+           | VarToken String      -- variable
+           | AssignToken          -- :=
+           | WhileToken           -- while
+           | DoToken              -- do
+           | TrueToken            -- True
+           | FalseToken           -- False
+           | AndToken             -- and
+           | NotToken             -- not
+           | NumeralEqToken       -- ==
+           | BoolEqToken          -- =
+           | LessOrEqToken        -- <=
+           | SemiColonToken       -- ;
+           deriving (Show, Eq)
+
+{-
+lexer :: String -> [String]
+lexer [] = []
+lexer (c:cs)
+    | isSpace c = lexer cs
+    | c elem ";(),*-+" = [c] : lexer cs
+    | c == '=' = if not (null cs) && head cs == '='
+                 then "==" : lexer (tail cs)
+                 else "=" : lexer cs
+    | c == ':' = if not (null cs) && head cs == '='
+                 then ":=" : lexer (tail cs)
+                 else ":" : lexer cs
+    | c == '<' = if not (null cs) && head cs == '='
+                 then "<=" : lexer (tail cs)
+                 else "<" : lexer cs             
+    | otherwise = let (token, rest) = span isTokenChar (c:cs)
+                  in token : lexer rest
+  where
+    isTokenChar x = not (isSpace x || x elem ";(),*=-:+")
+-}
+
+lexer :: String -> [Token]
+lexer [] = []
+lexer ('+': rest) = PlusToken : lexer rest
+lexer ('*': rest) = MultToken : lexer rest
+lexer ('-': rest) = MinusToken : lexer rest
+lexer ('(': rest) = OpenPToken : lexer rest
+lexer (')': rest) = ClosedPToken : lexer rest
+lexer ('n': 'o': 't': rest) = NotToken : lexer rest
+lexer ('a': 'n': 'd': rest) = AndToken : lexer rest
+lexer ('i': 'f': rest) = IfToken : lexer rest
+lexer ('t': 'h': 'e': 'n': rest) = ThenToken : lexer rest
+lexer ('e': 'l': 's': 'e': rest) = ElseToken : lexer rest
+lexer ('w': 'h': 'i': 'l': 'e': rest) = WhileToken : lexer rest
+lexer ('d': 'o': rest) = DoToken : lexer rest
+lexer ('=': '=': rest) = NumeralEqToken : lexer rest
+lexer ('=': rest) = BoolEqToken : lexer rest
+lexer ('<': '=': rest) = LessOrEqToken : lexer rest
+lexer (':': '=': rest) = AssignToken : lexer rest
+lexer ('T': 'r': 'u': 'e': rest) = TrueToken : lexer rest
+lexer ('F': 'a': 'l': 's' : 'e': rest) = FalseToken : lexer rest
+lexer (';': rest) = SemiColonToken : lexer rest
+lexer (c: rest)
+  | isSpace c = lexer rest  -- ignore spaces
+  | isDigit c = IntegerToken (read num) : lexer rest'   -- get digits and convert to integer
+  | isLower c = VarToken var : lexer rest''           -- starts w/ lowercase letter -> variable
+  | otherwise = error ("Bad character: " ++ [c])
+  where (num, rest') = span isDigit (c:rest)        -- get all digits
+        (var, rest'') = span isAlphaNum (c:rest)    -- get all alphanumeric characters
+
+-- Build Aerithmetic expressions
+
+buildAexp :: [Token] -> Aexp
+buildAexp tokens =
+    case parseSumOrHigher tokens of
+        (expr, []) -> expr
+        (_, _) -> error "Error building arithmetic expression"
+
+parseSumOrHigher :: [Token] -> (Aexp, [Token])
+parseSumOrHigher tokens =
+    case parseMultOrHigher tokens of
+        (expr1, PlusToken : restTokens1) ->
+            case parseSumOrHigher restTokens1 of
+                (expr2, restTokens2) -> (ADD expr1 expr2, restTokens2)
+        (expr1, MinusToken : restTokens1) ->
+            case parseSumOrHigher restTokens1 of
+                (expr2, restTokens2) -> (SUB expr1 expr2, restTokens2)
+        result -> result
+
+parseMultOrHigher :: [Token] -> (Aexp, [Token])
+parseMultOrHigher tokens =
+    case parseAtom tokens of
+        (expr1, MultToken : restTokens1) ->
+            case parseMultOrHigher restTokens1 of
+                (expr2, restTokens2) -> (MUL expr1 expr2, restTokens2)
+        result -> result
+
+parseAtom :: [Token] -> (Aexp, [Token])
+parseAtom (IntegerToken n : restTokens) = (CONST n, restTokens)
+parseAtom (VarToken var : restTokens) = (VAR var, restTokens)
+parseAtom (OpenPToken : restTokens1) =
+    case parseSumOrHigher restTokens1 of
+        (expr, ClosedPToken : restTokens2) -> (expr, restTokens2)
+        _ -> error "Error parsing atom (vars, consts and parenthesis-wraped expressions)"  -- no closing parenthesis or not parseable expression
+parseAtom _ = error "Error parsing atom (vars, consts and parenthesis-wraped expressions)"
+
+
+-- Parser
+parse :: String -> Program
+parse "" = []
+parse s = undefined 
+
+-- To help you test your parser
+testParser :: String -> (String, String)
+testParser programCode = (stack2Str stack, state2Str state)
+  where (_,stack,state) = run (compile (parse programCode), createEmptyStack, createEmptyState)
 
 compA :: Aexp -> Code
 compA = undefined -- TODO
@@ -161,45 +321,6 @@ compB = undefined -- TODO
 
 compile :: Program -> Code
 compile = undefined -- TODO
-
-lexer :: String -> [String]
-lexer [] = []
-lexer (c:cs)
-    | isSpace c = lexer cs
-    | c `elem` ";(),*-+" = [c] : lexer cs
-    | c == '=' = if not (null cs) && head cs == '='
-                 then "==" : lexer (tail cs)
-                 else "=" : lexer cs
-    | c == ':' = if not (null cs) && head cs == '='
-                 then ":=" : lexer (tail cs)
-                 else ":" : lexer cs
-    | otherwise = let (token, rest) = span isTokenChar (c:cs)
-                  in token : lexer rest
-  where
-    isTokenChar x = not (isSpace x || x `elem` ";(),*=-")
-
-
--- Parses an arithmetic expression and returns the expression and the remaining tokens
-parseAexp :: [String] -> (Aexp, [String])
-parseAexp tokens = undefined
-
--- Parses a boolean expression and returns the expression and the remaining tokens
-parseBexp :: [String] -> (Bexp, [String])
-parseBexp tokens = undefined
-
--- Parses a statement and returns the statement and the remaining tokens
-parseStm :: [String] -> (Stm, [String])
-parseStm tokens = undefined
-
-
-parse :: String -> Program
-parse "" = []
-parse s = undefined 
-
--- To help you test your parser
-testParser :: String -> (String, String)
-testParser programCode = (stack2Str stack, state2Str state)
-  where (_,stack,state) = run (compile (parse programCode), createEmptyStack, createEmptyState)
 
 -- Examples:
 -- testParser "x := 5; x := x - 1;" == ("","x=4")
