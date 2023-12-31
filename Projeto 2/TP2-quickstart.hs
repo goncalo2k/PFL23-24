@@ -176,7 +176,8 @@ data Aexp = CONST Integer
           | MUL Aexp Aexp
           deriving (Show, Eq)
 
-data Bexp = BOOLCONST Bool
+data Bexp = TRUE
+          | FALSE
           | AND Bexp Bexp
           | NOT Bexp
           | INTEQ Aexp Aexp
@@ -301,6 +302,78 @@ parseAtom (OpenPToken : restTokens1) =
         (expr, ClosedPToken : restTokens2) -> (expr, restTokens2)
         _ -> error "Error parsing atom (vars, consts and parenthesis-wraped expressions)"  -- no closing parenthesis or not parseable expression
 parseAtom _ = error "Error parsing atom (vars, consts and parenthesis-wraped expressions)"
+
+parseAndOrHigher :: [Token] -> (Bexp, [Token])
+parseAndOrHigher tokens = case parseBoolEqOrHigher tokens of
+    (expr1, AndToken : restTokens1) ->
+        case parseAndOrHigher restTokens1 of
+            (expr2, restTokens2) -> (AND expr1 expr2, restTokens2)
+    result -> result
+
+parseBoolEqOrHigher :: [Token] -> (Bexp, [Token])
+parseBoolEqOrHigher tokens = case parseNotOrHigher tokens of
+    (expr1, BoolEqToken : restTokens1) ->
+        case parseBoolEqOrHigher restTokens1 of
+            (expr2, restTokens2) -> (BOOLEQ expr1 expr2, restTokens2)
+    result -> result
+
+parseNotOrHigher :: [Token] -> (Bexp, [Token])
+parseNotOrHigher (NotToken : rest) = case parseNotOrHigher rest of
+    (expr, restTokens) -> (NOT expr, restTokens)
+parseNotOrHigher tokens = parseIntEqOrHigher tokens
+
+parseIntEqOrHigher :: [Token] -> (Bexp, [Token])
+parseIntEqOrHigher tokens = case parseSumOrHigher tokens of
+    (expr1, NumeralEqToken : restTokens1) ->
+        case parseSumOrHigher restTokens1 of
+            (expr2, restTokens2) -> (INTEQ expr1 expr2, restTokens2)
+    result -> parseLeOrHigher tokens
+
+parseLeOrHigher :: [Token] -> (Bexp, [Token])
+parseLeOrHigher tokens = case parseSumOrHigher tokens of
+    (expr1, LessOrEqToken : restTokens1) ->
+        case parseSumOrHigher restTokens1 of
+            (expr2, restTokens2) -> (LEINT expr1 expr2, restTokens2)
+    result -> parseTrueParen tokens  -- if cannot parseAexp or there is no LessOrEqTok
+
+parseTrueParen :: [Token] -> (Bexp, [Token])
+parseTrueParen (TrueToken : restTokens) = (TRUE, restTokens)
+parseTrueParen (FalseToken : restTokens) = (FALSE, restTokens)
+parseTrueParen (OpenPToken : restTokens1) = case parseAndOrHigher restTokens1 of
+    (expr, ClosedPToken : restTokens2) -> (expr, restTokens2)
+
+
+
+type ResultTokens = [Token]
+type RemainderTokens = [Token]
+type ParenthesisStack = [Char]
+
+-- assumes the expression always has parentheses (must start with OpenParenTok)
+getBetweenParenTokens :: [Token] -> (ResultTokens, RemainderTokens)
+getBetweenParenTokens tokens = (elseTokens, restTokens)
+  where (restTokens, _, elseTokens) = getBetweenParenTokensAux tokens [] []
+
+-- Receives tokens to process, stack and current result
+-- Returns remainder, stack, and result
+getBetweenParenTokensAux :: RemainderTokens -> ParenthesisStack -> ResultTokens
+    -> (RemainderTokens, ParenthesisStack, ResultTokens)
+-- reverse the result since tokens are inserted in reversed order
+-- no more tokens, return result
+getBetweenParenTokensAux [] stk res = ([], [], reverse res)
+
+-- push parenthesis to stack
+getBetweenParenTokensAux (OpenPToken:tokens) stk res = 
+    getBetweenParenTokensAux tokens ('(':stk) res
+
+-- pop parenthesis from stack
+getBetweenParenTokensAux (ClosedPToken:tokens) stk res = 
+    getBetweenParenTokensAux tokens (tail stk) res
+
+-- stack is empty (parentheses fully closed) -> return result
+-- if stack non-empty (non-closed parentheses), token is part of the expression
+getBetweenParenTokensAux (tok:tokens) stk res    
+    | null stk   = (tok:tokens, [], reverse res)
+    | otherwise  = getBetweenParenTokensAux tokens stk (tok:res)
 
 
 -- Parser
