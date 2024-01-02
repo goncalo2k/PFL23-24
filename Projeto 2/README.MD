@@ -27,6 +27,8 @@ After this, we also defined the data type State, which is basically a list of tu
 
 #### Running the Program
 
+In order to run the program, we created a function that received a list of instructions as an argument. For each instruction it read at the top of the list, the stack and/or storage were updated as needed. This was followed by the recursive call of the run function which now contained the tail of the list of instructions. When achieving a state where this list is empty, we made it so the program halted execution, returning a touple with en empty instructions list, the final stack state and the final storage state. This could now be used to compare execution fidelity against known results for a given input or to simply print out the result of the program.
+
 ### Part 2 - Parsing and Building Statements
 
 In this second part of the project, we need to design a lexer and a parser for our language.

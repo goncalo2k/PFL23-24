@@ -19,30 +19,6 @@ data Val = CharVal Char | IntVal Integer | TT | FF
 
 type Stack = [Val]
 
--- Add a new element to the top of the stack
-push :: Val -> Stack -> Stack
-push x xs = x : xs
-
--- Remove the top element from the stack
-pop :: Stack -> Stack
-pop (_:xs) = xs
-pop _ = error "Run-time error"
-
--- Return the top element of the stack
-top :: Stack -> Val
-top (x:_) = x
-top _ = error "Run-time error"
-
--- Create an empty stack
-empty :: Stack
-empty = []
-
--- Check if the stack is empty
-isEmpty :: Stack -> Bool
-isEmpty [] = True
-isEmpty _  = False
-
-
 type State = [(String, Val)]
 
 -- Create an empty stack
