@@ -15,9 +15,17 @@ ghci> testParser "<input>"
 ## General Description
 In this project, we were asked to design an Haskell compiler for a simple imperative language.
 
-### Part 1 - Data Definition and Interpreter
+### Part 1 - Data Definition and Assembler
 
-In the first part of the assignment, we must define how our data will be organized and create the interpreter and the assembler of the language.
+In the first part of the assignment, we must define how our data will be organized and create the assembler of the language.
+
+#### Data Types
+
+In this first step of our project, we needed to define the possible instructions of a stack, the possible values in that same data structure and the stack itself, which is just a list of those same values.
+
+After this, we also defined the data type State, which is basically a list of tuples where a string is associated with a value.
+
+#### Running the Program
 
 ### Part 2 - Parsing and Building Statements
 
