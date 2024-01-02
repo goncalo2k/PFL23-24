@@ -5,12 +5,15 @@
 import Data.List
 import Data.Char
 
+-- Possible instructions in the stack machine
 data Inst =
   Push Integer | Add | Mult | Sub | Tru | Fals | Equ | Le | And | Neg | Fetch String | Store String | Noop |
   Branch Code Code | Loop Code Code
   deriving Show
+
 type Code = [Inst]
 
+-- Possible values in the stack
 data Val = CharVal Char | IntVal Integer | TT | FF
     deriving (Eq, Show)
 
@@ -42,12 +45,15 @@ isEmpty _  = False
 
 type State = [(String, Val)]
 
+-- Create an empty stack
 createEmptyStack :: Stack
 createEmptyStack = []
 
+-- Create an empty state
 createEmptyState :: State
 createEmptyState = []
 
+-- Creates a string based on the contents of a stack
 stack2Str :: Stack -> String
 stack2Str = intercalate "," . map valToString
   where
@@ -55,7 +61,7 @@ stack2Str = intercalate "," . map valToString
     valToString TT = "True"
     valToString FF = "False"
 
-
+-- Creates a string based on the contents of a state
 state2Str :: State -> String
 state2Str = intercalate "," . map (\(var, value) -> var ++ "=" ++ valToString value) . sortOn fst
   where
@@ -68,58 +74,72 @@ run :: (Code, Stack, State) -> (Code, Stack, State)
 run ([], stack, state) = ([], stack, state)
 run (inst:rest, stack, state) =
     case inst of
+        -- Pushes an Integer value into the stack
         Push n      -> run (rest, IntVal n:stack, state)
+        -- Pops the first top two values on the stack, adds them, and pushes the result into the stack
         Add         -> case stack of
                           (IntVal x:IntVal y:stack') -> run (rest, IntVal (x + y) : stack', state)
                           _ -> error "Run-Time Error"
+        -- Pops the first top two values on the stack, subtracts them, and pushes the result into the stack
         Sub         -> case stack of
                           (IntVal x:IntVal y:stack') -> run (rest, IntVal (x - y) : stack', state)
                           _ -> error "Run-Time Error"
+        -- Pops the first top two values on the stack, multiplies them, and pushes the result into the stack
         Mult        -> case stack of
                           (IntVal x:IntVal y:stack') -> run (rest, IntVal (x * y) : stack', state)
                           _ -> error "Run-Time Error"
+        -- Pushes a True value into the stack
         Tru         -> run (rest, TT:stack, state)
+        -- Pushes a False value into the stack
         Fals        -> run (rest, FF:stack, state)
+        -- Pops the first top two values on the stack, booleans or integers, compares them, and pushes the result into the stack
         Equ         -> case stack of
                           (IntVal x:IntVal y:stack') -> run (rest, (if x == y then TT else FF) : stack', state)
                           (x:y:stack') | x == y      -> run (rest, TT : stack', state)
                                        | otherwise  -> run (rest, FF : stack', state)
                           _                         -> error "Run-Time Error"
+        -- Pops the first top two values on the stack, only integers, compares them, and pushes the result into the stack
         Le          -> let (IntVal x:IntVal y:stack') = stack in run (rest, if x <= y then TT:stack' else FF:stack', state)
+        -- Pops the first top two values on the stack, only booleans, compares them, and pushes the result into the stack
         And         -> case stack of
                           (TT:TT:stack') -> run (rest, TT : stack', state)
                           (FF:FF:stack') -> run (rest, FF : stack', state)
                           (TT:FF:stack') -> run (rest, FF : stack', state)
                           (FF:TT:stack') -> run (rest, FF : stack', state)
                           _              -> error "Run-time error"
+        -- Pops the first top value on the stack, only a boolean, negates it, and pushes the result into the stack
         Neg         -> let (x:stack') = stack in run (rest, if x == FF then TT:stack' else FF:stack', state)
+        -- Retrieves the value of a variable from the state and pushes it into the stack
         Fetch x     -> case lookup x state of
                           Nothing -> error "Run-time error"  -- Variable not found
                           Just val -> run (rest, val : stack, state)
+        -- Pops the first top value on the stack and stores it in the state
         Store x     -> let (val:stack') = stack in run (rest, stack', updateState x val state)
+        -- Dummy instruction
         Noop        -> run (rest, stack, state)
+        -- Executes the first code if the first top value on the stack is True, otherwise executes the second code
         Branch c1 c2 -> case stack of
                           (TT:stack') -> run (c1 ++ rest, stack', state)
                           (FF:stack') -> run (c2 ++ rest, stack', state)
+        -- Executes the first code, then the second code, then the first code again, and so on, while the first top value on the stack is True
         Loop c1 c2  -> run (c1 ++ [Branch (c2 ++ [Loop c1 c2]) [Noop]] ++ rest, stack, state)
-        -- Add more cases as necessary
 
+-- Updates the state with a new variable value
 updateState :: String -> Val -> State -> State
 updateState var value state = (var, value) : filter ((/= var) . fst) state
 
+-- Converts a boolean value to a string
 boolToString :: Bool -> String
 boolToString True = "True"
 boolToString False = "False"
 
+-- Converts a tuple of strings to a string
 tupleToString :: (String, String) -> String
 tupleToString (str1, str2) = str1 ++ ";" ++ str2
 
 -- Part 2
 
-data Expr = AExp Aexp Aexp | BExp Bexp Bexp
-    deriving (Show, Eq)
-
--- Possible Arithmetic Operations
+-- Possible Arithmetic Operations and Expressions
 data Aexp = CONST Integer
           | VAR String
           | ADD Aexp Aexp
@@ -127,7 +147,7 @@ data Aexp = CONST Integer
           | MUL Aexp Aexp
           deriving (Show, Eq)
 
--- Possible Boolean Operations
+-- Possible Boolean Operations and Expressions
 data Bexp = TRUE
           | FALSE
           | AND Bexp Bexp
@@ -192,12 +212,12 @@ lexer ('T': 'r': 'u': 'e': rest) = TrueToken : lexer rest
 lexer ('F': 'a': 'l': 's' : 'e': rest) = FalseToken : lexer rest
 lexer (';': rest) = SemiColonToken : lexer rest
 lexer (c: rest)
-  | isSpace c = lexer rest  -- ignore spaces
-  | isDigit c = IntegerToken (read num) : lexer rest'   -- get digits and convert to integer
-  | isLower c = VarToken var : lexer rest''           -- starts w/ lowercase letter -> variable
+  | isSpace c = lexer rest
+  | isDigit c = IntegerToken (read num) : lexer rest' 
+  | isLower c = VarToken var : lexer rest''           
   | otherwise = error ("Bad character: " ++ [c])
-  where (num, rest') = span isDigit (c:rest)        -- get all digits
-        (var, rest'') = span isAlphaNum (c:rest)    -- get all alphanumeric characters
+  where (num, rest') = span isDigit (c:rest)        
+        (var, rest'') = span isAlphaNum (c:rest)    
 
 -- Build statements from tokens
 buildData :: [Token] -> [Stm]
