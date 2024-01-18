@@ -1,0 +1,30 @@
+Examples of list comprehensions (15’).
+2.1 + 2.16 (concat, replicate, (!!) with recursion and comprehension) (30’)
+LI-4 (reverse - with and without an accumulator) (10’)
+
+2.6 (squareSum) (5’)
+2.8 (dotprod) (10’)
+2.11 (pitagoricos) (10’)
+2.9, 2.10, 2.12, 2.13 (divprop, perfeitos, primo, mersennes) (15’, 5’ each)
+2.18 (mindiv, primo) (20’, 10’ each)
+2.21, 2.22, 2.23 (algarismos, toBits, fromBits) (25’, 10’ for 2.21 and 2.22, 5’ for 2.23)
+3.1 (10’)
+3.2, conversion to point-free style (15’)
+3.7c (5’)
+3.7d, conversion to point-free style (10’)
+
+Continue sheet 3 at your pace (80’)
+User-defined types: type vs data. (10’)
+Maybe and Either. (10’)
+5.6 - Map module with empty, insert and lookup (60’)
+Examples about infinite lists and lazy evaluation:
+   1 - Fibonacci numbers. (20’)
+   2 - Pi approximation. (20’)
+ioSucc (book exercise IP-1) (15’)
+myGetLine (book exercise IP-7) (15’)
+4.9 (20’)
+
+myPermutations (LI-39) (you may import delete from Data.List) (15’)
+myScanl (HO-41) - Solutions with recursion and with higher-order functions (25’)
+kadane (HO-43) (20’)
+convert your solution of kadane to point-free style (HO-53) (10’)
